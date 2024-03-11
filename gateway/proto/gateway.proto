@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+option go_package = "gateway/proto";
+
+package proto;
+
+
+service Registry {
+  rpc Register (RegisterInfo) returns (RegisterRes) {}
+  rpc UnRegister (UnRegisterInfo) returns (UnRegisterRes) {}
+  rpc Heartbeat (HeartbeatInfo) returns (HeartbeatResp) {}
+}
+
+message RegisterInfo {
+  string ServiceName = 1;
+  string ServiceType = 2;
+  ServiceAddress ServiceAddress = 3;
+  repeated ServiceInterface ServiceInterfaces = 4;
+  string HeartbeatAddress = 5;
+}
+
+message ServiceInterface {
+  string Path = 1;
+  string Protocol = 2;
+}
+
+message ServiceAddress {
+  string Host = 1;
+  string Port = 2;
+}
+
+message RegisterRes {
+  string RegisterMessage = 1;
+  bool RegisterResult = 2;
+}
+
+message UnRegisterInfo {
+  string ServiceName = 1;
+}
+
+message UnRegisterRes {
+  string UnRegisterMessage = 1;
+  bool UnRegisterResult = 2;
+}
+
+message HeartbeatInfo {
+  string ServiceName = 1;
+}
+
+message HeartbeatResp {
+  bool HeartBeatResult = 1;
+}
