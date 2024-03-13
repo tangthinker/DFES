@@ -11,7 +11,7 @@ var text = []byte(string("shanliao"))
 
 func TestSymmetricEncryptor_Encrypt(t *testing.T) {
 	se := SymmetricEncryptor{}
-	key := Next()
+	key := NextSymmetricKey()
 	fmt.Println(key)
 	cipher := se.Encrypt(key, text, AES)
 	fmt.Println(string(cipher))
