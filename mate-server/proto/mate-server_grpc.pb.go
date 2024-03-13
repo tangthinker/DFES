@@ -37,7 +37,7 @@ func NewMateServiceClient(cc grpc.ClientConnInterface) MateServiceClient {
 
 func (c *mateServiceClient) Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error) {
 	out := new(JoinResponse)
-	err := c.cc.Invoke(ctx, "/proto.MateService/Join", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/mate.server.proto.MateService/Join", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *mateServiceClient) Join(ctx context.Context, in *JoinRequest, opts ...g
 
 func (c *mateServiceClient) Push(ctx context.Context, in *PushRequest, opts ...grpc.CallOption) (*PushResponse, error) {
 	out := new(PushResponse)
-	err := c.cc.Invoke(ctx, "/proto.MateService/Push", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/mate.server.proto.MateService/Push", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (c *mateServiceClient) Push(ctx context.Context, in *PushRequest, opts ...g
 
 func (c *mateServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
 	out := new(GetResponse)
-	err := c.cc.Invoke(ctx, "/proto.MateService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/mate.server.proto.MateService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func _MateService_Join_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.MateService/Join",
+		FullMethod: "/mate.server.proto.MateService/Join",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MateServiceServer).Join(ctx, req.(*JoinRequest))
@@ -126,7 +126,7 @@ func _MateService_Push_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.MateService/Push",
+		FullMethod: "/mate.server.proto.MateService/Push",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MateServiceServer).Push(ctx, req.(*PushRequest))
@@ -144,7 +144,7 @@ func _MateService_Get_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.MateService/Get",
+		FullMethod: "/mate.server.proto.MateService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MateServiceServer).Get(ctx, req.(*GetRequest))
@@ -156,7 +156,7 @@ func _MateService_Get_Handler(srv interface{}, ctx context.Context, dec func(int
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var MateService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.MateService",
+	ServiceName: "mate.server.proto.MateService",
 	HandlerType: (*MateServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -25,6 +25,10 @@ type RegistryClient interface {
 	Register(ctx context.Context, in *RegisterInfo, opts ...grpc.CallOption) (*RegisterRes, error)
 	UnRegister(ctx context.Context, in *UnRegisterInfo, opts ...grpc.CallOption) (*UnRegisterRes, error)
 	Heartbeat(ctx context.Context, in *HeartbeatInfo, opts ...grpc.CallOption) (*HeartbeatResp, error)
+	GetProvideServices(ctx context.Context, in *GetProvideInfo, opts ...grpc.CallOption) (*GetProvidesResp, error)
+	GetProvideService(ctx context.Context, in *GetProvideInfo, opts ...grpc.CallOption) (*GetProvideResp, error)
+	// rpc GetLeaderMate (Empty) returns (GetProvideResp) {}
+	GetProvideByName(ctx context.Context, in *GetByNameInfo, opts ...grpc.CallOption) (*GetProvideResp, error)
 }
 
 type registryClient struct {
@@ -62,6 +66,33 @@ func (c *registryClient) Heartbeat(ctx context.Context, in *HeartbeatInfo, opts 
 	return out, nil
 }
 
+func (c *registryClient) GetProvideServices(ctx context.Context, in *GetProvideInfo, opts ...grpc.CallOption) (*GetProvidesResp, error) {
+	out := new(GetProvidesResp)
+	err := c.cc.Invoke(ctx, "/proto.Registry/GetProvideServices", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *registryClient) GetProvideService(ctx context.Context, in *GetProvideInfo, opts ...grpc.CallOption) (*GetProvideResp, error) {
+	out := new(GetProvideResp)
+	err := c.cc.Invoke(ctx, "/proto.Registry/GetProvideService", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *registryClient) GetProvideByName(ctx context.Context, in *GetByNameInfo, opts ...grpc.CallOption) (*GetProvideResp, error) {
+	out := new(GetProvideResp)
+	err := c.cc.Invoke(ctx, "/proto.Registry/GetProvideByName", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RegistryServer is the server API for Registry service.
 // All implementations must embed UnimplementedRegistryServer
 // for forward compatibility
@@ -69,6 +100,10 @@ type RegistryServer interface {
 	Register(context.Context, *RegisterInfo) (*RegisterRes, error)
 	UnRegister(context.Context, *UnRegisterInfo) (*UnRegisterRes, error)
 	Heartbeat(context.Context, *HeartbeatInfo) (*HeartbeatResp, error)
+	GetProvideServices(context.Context, *GetProvideInfo) (*GetProvidesResp, error)
+	GetProvideService(context.Context, *GetProvideInfo) (*GetProvideResp, error)
+	// rpc GetLeaderMate (Empty) returns (GetProvideResp) {}
+	GetProvideByName(context.Context, *GetByNameInfo) (*GetProvideResp, error)
 	mustEmbedUnimplementedRegistryServer()
 }
 
@@ -84,6 +119,15 @@ func (UnimplementedRegistryServer) UnRegister(context.Context, *UnRegisterInfo) 
 }
 func (UnimplementedRegistryServer) Heartbeat(context.Context, *HeartbeatInfo) (*HeartbeatResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Heartbeat not implemented")
+}
+func (UnimplementedRegistryServer) GetProvideServices(context.Context, *GetProvideInfo) (*GetProvidesResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProvideServices not implemented")
+}
+func (UnimplementedRegistryServer) GetProvideService(context.Context, *GetProvideInfo) (*GetProvideResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProvideService not implemented")
+}
+func (UnimplementedRegistryServer) GetProvideByName(context.Context, *GetByNameInfo) (*GetProvideResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProvideByName not implemented")
 }
 func (UnimplementedRegistryServer) mustEmbedUnimplementedRegistryServer() {}
 
@@ -152,6 +196,60 @@ func _Registry_Heartbeat_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Registry_GetProvideServices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProvideInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServer).GetProvideServices(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Registry/GetProvideServices",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServer).GetProvideServices(ctx, req.(*GetProvideInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Registry_GetProvideService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProvideInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServer).GetProvideService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Registry/GetProvideService",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServer).GetProvideService(ctx, req.(*GetProvideInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Registry_GetProvideByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetByNameInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServer).GetProvideByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Registry/GetProvideByName",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServer).GetProvideByName(ctx, req.(*GetByNameInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Registry_ServiceDesc is the grpc.ServiceDesc for Registry service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +268,18 @@ var Registry_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Heartbeat",
 			Handler:    _Registry_Heartbeat_Handler,
+		},
+		{
+			MethodName: "GetProvideServices",
+			Handler:    _Registry_GetProvideServices_Handler,
+		},
+		{
+			MethodName: "GetProvideService",
+			Handler:    _Registry_GetProvideService_Handler,
+		},
+		{
+			MethodName: "GetProvideByName",
+			Handler:    _Registry_GetProvideByName_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

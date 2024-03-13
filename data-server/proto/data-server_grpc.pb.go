@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type DataServiceClient interface {
 	Push(ctx context.Context, in *PushRequest, opts ...grpc.CallOption) (*PushResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
+	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 }
 
 type dataServiceClient struct {
@@ -36,7 +37,7 @@ func NewDataServiceClient(cc grpc.ClientConnInterface) DataServiceClient {
 
 func (c *dataServiceClient) Push(ctx context.Context, in *PushRequest, opts ...grpc.CallOption) (*PushResponse, error) {
 	out := new(PushResponse)
-	err := c.cc.Invoke(ctx, "/proto.DataService/Push", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/data.server.proto.DataService/Push", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +46,16 @@ func (c *dataServiceClient) Push(ctx context.Context, in *PushRequest, opts ...g
 
 func (c *dataServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
 	out := new(GetResponse)
-	err := c.cc.Invoke(ctx, "/proto.DataService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/data.server.proto.DataService/Get", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dataServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
+	out := new(DeleteResponse)
+	err := c.cc.Invoke(ctx, "/data.server.proto.DataService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +68,7 @@ func (c *dataServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grp
 type DataServiceServer interface {
 	Push(context.Context, *PushRequest) (*PushResponse, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
+	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	mustEmbedUnimplementedDataServiceServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedDataServiceServer) Push(context.Context, *PushRequest) (*Push
 }
 func (UnimplementedDataServiceServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedDataServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedDataServiceServer) mustEmbedUnimplementedDataServiceServer() {}
 
@@ -94,7 +108,7 @@ func _DataService_Push_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.DataService/Push",
+		FullMethod: "/data.server.proto.DataService/Push",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DataServiceServer).Push(ctx, req.(*PushRequest))
@@ -112,10 +126,28 @@ func _DataService_Get_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.DataService/Get",
+		FullMethod: "/data.server.proto.DataService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DataServiceServer).Get(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DataService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DataServiceServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/data.server.proto.DataService/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DataServiceServer).Delete(ctx, req.(*DeleteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -124,7 +156,7 @@ func _DataService_Get_Handler(srv interface{}, ctx context.Context, dec func(int
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DataService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.DataService",
+	ServiceName: "data.server.proto.DataService",
 	HandlerType: (*DataServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -134,6 +166,10 @@ var DataService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Get",
 			Handler:    _DataService_Get_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _DataService_Delete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option go_package = "data_server/proto";
+
+package data.server.proto;
+
+service DataService {
+  rpc Push(PushRequest) returns (PushResponse) {}
+  rpc Get(GetRequest) returns (GetResponse) {}
+  rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+}
+
+message GetRequest {
+  string FragmentId = 1;
+}
+
+message GetResponse {
+  bytes FragmentData = 1;
+  string GetMessage = 2;
+  bool GetResult = 3;
+}
+
+message PushRequest {
+  bytes FragmentData = 1;
+}
+
+message PushResponse {
+  string FragmentId = 1;
+  string ServiceName = 2;
+  bool PushResult =3;
+}
+
+message DeleteRequest {
+  string FragmentId = 1;
+}
+
+message DeleteResponse {
+  bool DeleteResult = 1;
+}

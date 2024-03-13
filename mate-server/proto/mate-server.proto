@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option go_package = "mate_server/proto";
+
+package mate.server.proto;
+
+service MateService{
+  rpc Join(JoinRequest) returns (JoinResponse) {}
+  rpc Push(PushRequest) returns (PushResponse) {}
+  rpc Get(GetRequest) returns (GetResponse) {}
+}
+
+message JoinRequest {
+  string ServerName = 1;
+  string ServerAddr = 2;
+}
+
+message JoinResponse {
+  string Message = 1;
+  bool JoinResult = 2;
+}
+
+message PushRequest {
+  bytes Data = 1;
+}
+
+message PushResponse {
+  string DataId = 1;
+  bool PushResult = 2;
+  PushCode Code = 3;
+  string LeaderMateServerAddr = 4;
+}
+
+enum PushCode {
+  Success = 0;
+  Fail = 1;
+  NotLeader = 2;
+}
+
+message GetRequest {
+  string DataId = 1;
+}
+
+message GetResponse {
+  bytes Data = 1;
+}

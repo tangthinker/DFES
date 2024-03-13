@@ -1,0 +1,3 @@
+go run cmd/mate-server/main.go -port 7002 -server-name mate-node-2 -raft-addr "127.0.0.1:9002" -leader-addr "127.0.0.1:7001"
+
+go run cmd/data-server/main.go -port 8001 -server-name "mate-node-1"

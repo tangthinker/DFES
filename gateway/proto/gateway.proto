@@ -9,7 +9,35 @@ service Registry {
   rpc Register (RegisterInfo) returns (RegisterRes) {}
   rpc UnRegister (UnRegisterInfo) returns (UnRegisterRes) {}
   rpc Heartbeat (HeartbeatInfo) returns (HeartbeatResp) {}
+  rpc GetProvideServices (GetProvideInfo) returns (GetProvidesResp) {}
+  rpc GetProvideService (GetProvideInfo) returns (GetProvideResp) {}
+//  rpc GetLeaderMate (Empty) returns (GetProvideResp) {}
+  rpc GetProvideByName (GetByNameInfo) returns (GetProvideResp) {}
 }
+
+message GetProvideInfo {
+  string ServiceType = 1;
+}
+
+message GetProvidesResp {
+  repeated RegisterInfo ProvideServices = 1;
+  string GetMessage = 2;
+  bool GetResult = 3;
+}
+
+message GetProvideResp {
+  RegisterInfo ProvideService = 1;
+  string GetMessage = 2;
+  bool GetResult = 3;
+}
+
+message GetByNameInfo {
+  string ServiceName = 1;
+}
+
+message Empty {
+}
+
 
 message RegisterInfo {
   string ServiceName = 1;

@@ -16,6 +16,10 @@ func NewSequenceIdGenerator(prefix string) *SequenceIdGenerator {
 	}
 }
 
+func (s *SequenceIdGenerator) ResetPrefix(prefix string) {
+	s.Prefix = prefix
+}
+
 func (s *SequenceIdGenerator) Next() string {
 	var ok = false
 	var seq uint64
@@ -23,6 +27,6 @@ func (s *SequenceIdGenerator) Next() string {
 		seq = s.seq.Load()
 		ok = s.seq.CompareAndSwap(seq, seq+1)
 	}
-	result := fmt.Sprintf("%s%020d", s.Prefix, seq)
+	result := fmt.Sprintf("%s.%020d", s.Prefix, seq)
 	return result
 }
