@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/shanliao420/DFES/gateway"
+	"github.com/shanliao420/DFES/gateway/proto"
+	proto2 "github.com/shanliao420/DFES/mate-server/proto"
+	"github.com/shanliao420/DFES/utils"
 	"log"
 	"os"
-	"tangthinker.work/DFES/gateway"
-	"tangthinker.work/DFES/gateway/proto"
-	proto2 "tangthinker.work/DFES/mate-server/proto"
-	"tangthinker.work/DFES/utils"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 	log.Println(resp)
 	mateClient := utils.NewMateServerClient(
 		resp.GetProvideService().ServiceAddress.Host + ":" + resp.GetProvideService().ServiceAddress.Port)
-	b, _ := os.ReadFile("./api/interface.go")
+	b, _ := os.ReadFile("/Users/tangyubin/Downloads/ubuntu-22.04.4-live-server-amd64.iso")
 
 	presp, err := mateClient.Push(context.Background(), &proto2.PushRequest{
 		Data: b,

@@ -2,13 +2,13 @@ package main
 
 import (
 	"flag"
+	"github.com/shanliao420/DFES/gateway"
+	gatewayPB "github.com/shanliao420/DFES/gateway/proto"
+	mateServer "github.com/shanliao420/DFES/mate-server"
+	mateServerPB "github.com/shanliao420/DFES/mate-server/proto"
+	"github.com/shanliao420/DFES/utils"
 	"google.golang.org/grpc"
 	"log"
-	"tangthinker.work/DFES/gateway"
-	gatewayPB "tangthinker.work/DFES/gateway/proto"
-	mateServer "tangthinker.work/DFES/mate-server"
-	mateServerPB "tangthinker.work/DFES/mate-server/proto"
-	"tangthinker.work/DFES/utils"
 )
 
 var (

@@ -2,12 +2,12 @@ package data_server
 
 import (
 	"encoding/json"
+	"github.com/shanliao420/DFES/encryption"
+	idGenerator "github.com/shanliao420/DFES/id-generator"
+	"github.com/shanliao420/DFES/utils"
 	"log"
 	"os"
 	"path/filepath"
-	"tangthinker.work/DFES/encryption"
-	idGenerator "tangthinker.work/DFES/id-generator"
-	"tangthinker.work/DFES/utils"
 )
 
 const (

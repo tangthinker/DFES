@@ -2,7 +2,7 @@ package data_server
 
 import (
 	"context"
-	pb "tangthinker.work/DFES/data-server/proto"
+	pb "github.com/shanliao420/DFES/data-server/proto"
 )
 
 type RpcServer struct {

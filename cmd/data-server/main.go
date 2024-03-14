@@ -2,12 +2,12 @@ package main
 
 import (
 	"flag"
+	dataServer "github.com/shanliao420/DFES/data-server"
+	dataServerPB "github.com/shanliao420/DFES/data-server/proto"
+	"github.com/shanliao420/DFES/gateway"
+	gatewayPB "github.com/shanliao420/DFES/gateway/proto"
+	"github.com/shanliao420/DFES/utils"
 	"google.golang.org/grpc"
-	dataServer "tangthinker.work/DFES/data-server"
-	dataServerPB "tangthinker.work/DFES/data-server/proto"
-	"tangthinker.work/DFES/gateway"
-	gatewayPB "tangthinker.work/DFES/gateway/proto"
-	"tangthinker.work/DFES/utils"
 )
 
 var (

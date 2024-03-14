@@ -1,6 +1,6 @@
 package mate_server
 
-import "tangthinker.work/DFES/api"
+import "github.com/shanliao420/DFES/api"
 
 type MateService interface {
 	api.Api

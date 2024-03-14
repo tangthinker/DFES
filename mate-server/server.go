@@ -7,6 +7,11 @@ import (
 	"fmt"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb/v2"
+	dataServerPB "github.com/shanliao420/DFES/data-server/proto"
+	"github.com/shanliao420/DFES/gateway"
+	gatewayPB "github.com/shanliao420/DFES/gateway/proto"
+	idGenerator "github.com/shanliao420/DFES/id-generator"
+	"github.com/shanliao420/DFES/utils"
 	"io"
 	"log"
 	"math/rand"
@@ -15,11 +20,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	dataServerPB "tangthinker.work/DFES/data-server/proto"
-	"tangthinker.work/DFES/gateway"
-	gatewayPB "tangthinker.work/DFES/gateway/proto"
-	idGenerator "tangthinker.work/DFES/id-generator"
-	"tangthinker.work/DFES/utils"
 	"time"
 )
 
@@ -80,7 +80,7 @@ func (ms *MateServer) Push(ctx context.Context, data []byte) (string, error) {
 	fragmentCnt := (int64((len(data))/1024) / 1024) / ms.FragmentSize // MB
 	floatCnt := (float64(len(data)) / 1024 / 1024) / float64(ms.FragmentSize)
 	hasRest := strings.Split(fmt.Sprintf("%.1f", floatCnt), ".")[1] == "0"
-	if hasRest {
+	if !hasRest {
 		fragmentCnt++
 	}
 	var fileMate FileMate

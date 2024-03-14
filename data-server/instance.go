@@ -1,12 +1,12 @@
 package data_server
 
 import (
+	"github.com/shanliao420/DFES/encryption"
+	pb "github.com/shanliao420/DFES/gateway/proto"
+	"github.com/shanliao420/DFES/utils"
 	"log"
 	"os"
 	"path/filepath"
-	"tangthinker.work/DFES/encryption"
-	pb "tangthinker.work/DFES/gateway/proto"
-	"tangthinker.work/DFES/utils"
 )
 
 const (

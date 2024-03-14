@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"github.com/shanliao420/DFES/gateway"
+	"github.com/shanliao420/DFES/gateway/proto"
+	proto2 "github.com/shanliao420/DFES/mate-server/proto"
+	"github.com/shanliao420/DFES/utils"
 	"log"
-	"tangthinker.work/DFES/gateway"
-	"tangthinker.work/DFES/gateway/proto"
-	proto2 "tangthinker.work/DFES/mate-server/proto"
-	"tangthinker.work/DFES/utils"
+	"os"
 )
 
 func main() {
@@ -22,9 +23,14 @@ func main() {
 		resp.GetProvideService().ServiceAddress.Host + ":" + resp.GetProvideService().ServiceAddress.Port)
 	//b, _ := os.ReadFile("./api/interface.go")
 	gresp, err := mateClient.Get(context.Background(), &proto2.GetRequest{
-		DataId: "mate-node-1.00000000000000000000",
+		DataId: "mate-node-1.00000000000000000001",
 	})
-
 	log.Println(err)
-	log.Println(gresp)
+
+	err = os.WriteFile("./data/test.iso", gresp.Data, 0700)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(err)
+	//log.Println(gresp)
 }

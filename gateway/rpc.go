@@ -3,8 +3,8 @@ package gateway
 import (
 	"context"
 	"errors"
+	pb "github.com/shanliao420/DFES/gateway/proto"
 	"log"
-	pb "tangthinker.work/DFES/gateway/proto"
 )
 
 type RpcServer struct {

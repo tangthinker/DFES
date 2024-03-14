@@ -2,7 +2,7 @@ package mate_server
 
 import (
 	"context"
-	pb "tangthinker.work/DFES/mate-server/proto"
+	pb "github.com/shanliao420/DFES/mate-server/proto"
 )
 
 type RpcServer struct {

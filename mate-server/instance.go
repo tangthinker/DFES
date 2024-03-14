@@ -3,10 +3,10 @@ package mate_server
 import (
 	"context"
 	"fmt"
+	"github.com/shanliao420/DFES/gateway"
+	mateServerPB "github.com/shanliao420/DFES/mate-server/proto"
+	"github.com/shanliao420/DFES/utils"
 	"log"
-	"tangthinker.work/DFES/gateway"
-	mateServerPB "tangthinker.work/DFES/mate-server/proto"
-	"tangthinker.work/DFES/utils"
 	"time"
 )
 
@@ -15,14 +15,14 @@ const (
 	DefaultRetainSnapshotCount = 20
 	DefaultRaftAddr            = "127.0.0.1:70001"
 	DefaultServerName          = "shanliao-mate-server-1"
-	DefaultFragmentSize        = 16 // 16MB
+	DefaultFragmentSize        = 24 // 24MB
 	DefaultFragmentReplicaSize = 3
 	DefaultDataClientCacheSize = 20
 )
 
 var mateServer = NewMateServer(DefaultRaftDir, DefaultRetainSnapshotCount, DefaultRaftAddr, DefaultServerName, DefaultFragmentSize, DefaultFragmentReplicaSize)
 
-var dataClientCache = utils.NewActionCache(20)
+var dataClientCache = utils.NewActionCache(DefaultDataClientCacheSize)
 
 func init() {
 	mateServer.registryCenter = utils.NewRegistryClient(gateway.DefaultRegistryServerAddr)
