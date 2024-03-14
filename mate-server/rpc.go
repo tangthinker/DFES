@@ -46,3 +46,21 @@ func (RpcServer) Get(ctx context.Context, in *pb.GetRequest) (*pb.GetResponse, e
 		Data: b,
 	}, nil
 }
+
+func (RpcServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.DeleteResponse, error) {
+	if !mateServer.IsLeader() {
+		return &pb.DeleteResponse{
+			DeleteResult:         false,
+			Code:                 pb.MateCode_NotLeader,
+			LeaderMateServerAddr: mateServer.leaderRpcAddr,
+		}, nil
+	}
+	ret, err := mateServer.Delete(ctx, in.GetDataId())
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DeleteResponse{
+		DeleteResult: ret,
+		Code:         pb.MateCode_Success,
+	}, nil
+}

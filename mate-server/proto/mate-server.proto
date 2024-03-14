@@ -8,6 +8,7 @@ service MateService{
   rpc Join(JoinRequest) returns (JoinResponse) {}
   rpc Push(PushRequest) returns (PushResponse) {}
   rpc Get(GetRequest) returns (GetResponse) {}
+  rpc Delete(DeleteRequest) returns (DeleteResponse) {}
 }
 
 message JoinRequest {
@@ -46,4 +47,14 @@ message GetResponse {
   bool GetResult = 2;
   MateCode Code = 3;
   string LeaderMateServerAddr = 4;
+}
+
+message DeleteRequest {
+  string DataId =  1;
+}
+
+message DeleteResponse {
+  bool DeleteResult = 1;
+  MateCode Code = 2;
+  string LeaderMateServerAddr = 3;
 }
