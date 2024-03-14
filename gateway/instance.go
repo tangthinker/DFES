@@ -23,11 +23,13 @@ func PrintOnlineServices() {
 	registryStore.mutex.RLock()
 	defer registryStore.mutex.RUnlock()
 	for _, item := range registryStore.onlineService {
-		fmt.Printf("%s %s %s:%s\n", item.ServiceName, item.ServiceType, item.ServiceAddress.Host, &item.ServiceAddress.Port)
+		fmt.Printf("%s %s %s:%s\n", item.ServiceName, item.ServiceType, item.ServiceAddress.Host, item.ServiceAddress.Port)
 	}
 }
 
 func GetProvideServices(serviceType ServiceType) []RegisterInfo {
+	registryStore.mutex.RLock()
+	defer registryStore.mutex.RUnlock()
 	result := make([]RegisterInfo, 0)
 	for _, item := range registryStore.onlineService {
 		if item.ServiceType == serviceType {
@@ -38,6 +40,8 @@ func GetProvideServices(serviceType ServiceType) []RegisterInfo {
 }
 
 func GetByServiceName(serviceName ServiceName) (RegisterInfo, bool) {
+	registryStore.mutex.RLock()
+	defer registryStore.mutex.RUnlock()
 	value, ok := registryStore.onlineService[serviceName]
 	if ok {
 		return *value, ok

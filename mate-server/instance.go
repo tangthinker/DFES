@@ -2,9 +2,12 @@ package mate_server
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"tangthinker.work/DFES/gateway"
 	mateServerPB "tangthinker.work/DFES/mate-server/proto"
 	"tangthinker.work/DFES/utils"
+	"time"
 )
 
 const (
@@ -31,6 +34,24 @@ func init() {
 
 func InitRaft(firstNodeOrSingleMode bool) {
 	mateServer.InitRaft(firstNodeOrSingleMode)
+	go func() {
+		for {
+			addr, id := mateServer.raft.LeaderWithID()
+			fmt.Println(mateServer.raft.State().String(), " leader addr:", addr, " leader id:", id)
+			time.Sleep(1 * time.Second)
+		}
+	}()
+	go func() {
+		for {
+			select {
+			case <-mateServer.raft.LeaderCh():
+				if mateServer.IsLeader() {
+					_ = mateServer.applyLeaderChange(mateServer.localRpcAddr)
+					log.Println("leader addr change:", mateServer.localRpcAddr)
+				}
+			}
+		}
+	}()
 }
 
 func Join(leaderAddr string) error {
@@ -48,6 +69,10 @@ func Join(leaderAddr string) error {
 
 func SetRaftAddr(raftAddr string) {
 	mateServer.raftAddr = raftAddr
+}
+
+func SetLocalRpcAddr(localRpcAddr string) {
+	mateServer.localRpcAddr = localRpcAddr
 }
 
 func SetServerName(serverName string) {

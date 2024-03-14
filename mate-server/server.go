@@ -42,6 +42,8 @@ type MateServer struct {
 	registryCenter gatewayPB.RegistryClient
 
 	leaderRpcAddr string
+
+	localRpcAddr string
 }
 
 const (
@@ -49,6 +51,9 @@ const (
 )
 
 func (ms *MateServer) IsLeader() bool {
+	if addr, _ := ms.raft.LeaderWithID(); addr == "" {
+		ms.raft.LeadershipTransfer()
+	}
 	return ms.raft.State() == raft.Leader
 }
 
@@ -83,6 +88,7 @@ func (ms *MateServer) Push(ctx context.Context, data []byte) (string, error) {
 	fileMate.FragmentCnt = fragmentCnt
 	fileMate.Fragments = make(map[int64]*Fragment)
 	for i := int64(0); i < fragmentCnt; i++ {
+		log.Println("push fragment", i, " total:", fragmentCnt)
 		var fragment Fragment
 		fragment.Replicas = make([]FragmentUint, 0)
 		left := i * (ms.FragmentSize * 1024 * 1024)
@@ -91,7 +97,8 @@ func (ms *MateServer) Push(ctx context.Context, data []byte) (string, error) {
 			right = int64(len(data))
 		}
 		idxArr := findMachina(len(getRes.GetProvideServices()), ms.FragmentReplicaSize)
-		for _, idx := range idxArr {
+		for k, idx := range idxArr {
+			log.Println("push fragment idx", k, " to node")
 			target := getRes.GetProvideServices()[idx]
 			targetAddr := target.ServiceAddress.Host + ":" + target.ServiceAddress.Port
 			targetDataNode := dataClientCache.Get(targetAddr).(dataServerPB.DataServiceClient)
@@ -105,7 +112,9 @@ func (ms *MateServer) Push(ctx context.Context, data []byte) (string, error) {
 				FragmentId:   pushRes.FragmentId,
 				DataNodeAddr: targetAddr,
 			})
+			log.Println("push fragment idx", k, " to node successful ")
 		}
+		log.Println("push fragment", i, " successful,  total:", fragmentCnt)
 		fileMate.Fragments[i] = &fragment
 	}
 	fileMateId := ms.idGenerator.Next()
@@ -164,9 +173,9 @@ func (ms *MateServer) Get(ctx context.Context, id string) ([]byte, error) {
 			break
 		}
 	}
-	//if fileMate.SourceHashCode != utils.Hash(ret) {
-	//	return nil, errors.New("GetData hash not equal source hash code")
-	//}
+	if fileMate.SourceHashCode != utils.Hash(ret) {
+		return nil, errors.New("GetData hash not equal source hash code")
+	}
 	return ret, nil
 }
 
@@ -204,6 +213,20 @@ func (ms *MateServer) applyDelete(mateId string) error {
 	comm := &command{
 		FileId: mateId,
 		Op:     opDelete,
+	}
+	b, err := json.Marshal(comm)
+	if err != nil {
+		return err
+	}
+
+	f := ms.raft.Apply(b, DefaultRaftTimeout)
+	return f.Error()
+}
+
+func (ms *MateServer) applyLeaderChange(leaderAddr string) error {
+	comm := &command{
+		Op:         opLeaderChange,
+		LeaderAddr: leaderAddr,
 	}
 	b, err := json.Marshal(comm)
 	if err != nil {
@@ -324,6 +347,8 @@ func (f *fsm) Apply(l *raft.Log) interface{} {
 		return f.push(c.FileId, c.FileMate)
 	case opDelete:
 		return f.delete(c.FileId)
+	case opLeaderChange:
+		return f.leaderChange(c.LeaderAddr)
 	default:
 		panic(fmt.Sprintf("unrecognized command op: %s", c.Op))
 	}
@@ -368,6 +393,13 @@ func (f *fsm) delete(fileId string) interface{} {
 	return nil
 }
 
+func (f *fsm) leaderChange(addr string) interface{} {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+	f.leaderRpcAddr = addr
+	return nil
+}
+
 type fsmSnapshots struct {
 	snapshot map[string]FileMate
 }
@@ -400,12 +432,14 @@ func (f *fsmSnapshots) Release() {
 }
 
 type command struct {
-	Op       string   `json:"op,omitempty"`
-	FileMate FileMate `json:"file-mate,omitempty"`
-	FileId   string   `json:"file-id,omitempty"`
+	Op         string   `json:"op,omitempty"`
+	FileMate   FileMate `json:"file-mate,omitempty"`
+	FileId     string   `json:"file-id,omitempty"`
+	LeaderAddr string   `json:"leader-addr,omitempty"`
 }
 
 const (
-	opPush   = "push"
-	opDelete = "delete"
+	opPush         = "push"
+	opDelete       = "delete"
+	opLeaderChange = "leaderChange"
 )

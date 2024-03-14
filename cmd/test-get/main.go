@@ -22,8 +22,9 @@ func main() {
 		resp.GetProvideService().ServiceAddress.Host + ":" + resp.GetProvideService().ServiceAddress.Port)
 	//b, _ := os.ReadFile("./api/interface.go")
 	gresp, err := mateClient.Get(context.Background(), &proto2.GetRequest{
-		DataId: "shanliao-mate-node-1.00000000000000000000",
+		DataId: "mate-node-1.00000000000000000000",
 	})
+
 	log.Println(err)
 	log.Println(gresp)
 }

@@ -23,6 +23,7 @@ func (r *registry) Register(registerInfo RegisterInfo) error {
 	timer := time.NewTimer(heartbeatTime * time.Second)
 	registerInfo.HeartbeatTimer = timer
 	r.onlineService[registerInfo.ServiceName] = &registerInfo
+	log.Println("register", registerInfo.ServiceName, "successful")
 	go func() {
 		for {
 			select {
@@ -39,8 +40,9 @@ func (r *registry) Register(registerInfo RegisterInfo) error {
 func (r *registry) UnRegister(serviceName ServiceName) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	registerInfo, ok := GetByServiceName(serviceName)
-	if ok {
+	registerInfo, ok := r.onlineService[serviceName]
+	if !ok {
+		log.Println("unregister a service already removed")
 		return nil
 	}
 	delete(r.onlineService, serviceName)
@@ -49,9 +51,9 @@ func (r *registry) UnRegister(serviceName ServiceName) error {
 }
 
 func (r *registry) Heartbeat(serviceName ServiceName) error {
-	r.mutex.Lock()
-	registerInfo, ok := GetByServiceName(serviceName)
-	r.mutex.Unlock()
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+	registerInfo, ok := r.onlineService[serviceName]
 	if !ok {
 		log.Println("heartbeat get info error")
 		return errors.New("heartbeat get info error")

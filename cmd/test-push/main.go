@@ -45,7 +45,8 @@ func main() {
 		log.Println(err)
 	}
 	fmt.Println(presp)
-	if presp.GetCode() == proto2.PushCode_NotLeader {
+	fmt.Println(presp.LeaderMateServerAddr)
+	if presp.GetCode() == proto2.MateCode_NotLeader { // 因为选举存在一定延迟，第二次请求也不一定为leader节点，可多次重试
 		leaderClient := utils.NewMateServerClient(presp.LeaderMateServerAddr)
 		ppresp, err := leaderClient.Push(context.Background(), &proto2.PushRequest{
 			Data: b,

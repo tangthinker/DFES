@@ -22,7 +22,7 @@ func (RpcServer) Push(ctx context.Context, in *pb.PushRequest) (*pb.PushResponse
 	if !mateServer.IsLeader() {
 		return &pb.PushResponse{
 			PushResult:           false,
-			Code:                 pb.PushCode_NotLeader,
+			Code:                 pb.MateCode_NotLeader,
 			LeaderMateServerAddr: mateServer.leaderRpcAddr,
 		}, nil
 	}
@@ -32,7 +32,7 @@ func (RpcServer) Push(ctx context.Context, in *pb.PushRequest) (*pb.PushResponse
 	}
 	return &pb.PushResponse{
 		PushResult: true,
-		Code:       pb.PushCode_Success,
+		Code:       pb.MateCode_Success,
 		DataId:     fileMateId,
 	}, nil
 }

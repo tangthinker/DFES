@@ -27,11 +27,11 @@ message PushRequest {
 message PushResponse {
   string DataId = 1;
   bool PushResult = 2;
-  PushCode Code = 3;
+  MateCode Code = 3;
   string LeaderMateServerAddr = 4;
 }
 
-enum PushCode {
+enum MateCode {
   Success = 0;
   Fail = 1;
   NotLeader = 2;
@@ -43,4 +43,7 @@ message GetRequest {
 
 message GetResponse {
   bytes Data = 1;
+  bool GetResult = 2;
+  MateCode Code = 3;
+  string LeaderMateServerAddr = 4;
 }
