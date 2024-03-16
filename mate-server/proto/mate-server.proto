@@ -9,6 +9,9 @@ service MateService{
   rpc Push(PushRequest) returns (PushResponse) {}
   rpc Get(GetRequest) returns (GetResponse) {}
   rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+
+  rpc PushStream(stream PushRequest) returns (PushResponse) {}
+  rpc GetStream(GetRequest) returns (stream GetResponse) {}
 }
 
 message JoinRequest {
@@ -36,6 +39,7 @@ enum MateCode {
   Success = 0;
   Fail = 1;
   NotLeader = 2;
+  FileNotExist = 4;
 }
 
 message GetRequest {
@@ -46,7 +50,6 @@ message GetResponse {
   bytes Data = 1;
   bool GetResult = 2;
   MateCode Code = 3;
-  string LeaderMateServerAddr = 4;
 }
 
 message DeleteRequest {

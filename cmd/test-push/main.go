@@ -35,7 +35,7 @@ func main() {
 	log.Println(resp)
 	mateClient := utils.NewMateServerClient(
 		resp.GetProvideService().ServiceAddress.Host + ":" + resp.GetProvideService().ServiceAddress.Port)
-	b, _ := os.ReadFile("/Users/tangyubin/Downloads/ubuntu-22.04.4-live-server-amd64.iso")
+	b, _ := os.ReadFile("/Users/tangyubin/Downloads/ideaIU-2023.3.4.dmg")
 
 	presp, err := mateClient.Push(context.Background(), &proto2.PushRequest{
 		Data: b,

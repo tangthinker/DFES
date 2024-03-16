@@ -15,7 +15,7 @@ const (
 	DefaultRetainSnapshotCount = 20
 	DefaultRaftAddr            = "127.0.0.1:70001"
 	DefaultServerName          = "shanliao-mate-server-1"
-	DefaultFragmentSize        = 24 // 24MB
+	DefaultFragmentSize        = 24 * 1024 * 1024 // 24MB
 	DefaultFragmentReplicaSize = 3
 	DefaultDataClientCacheSize = 20
 )

@@ -7,9 +7,9 @@ import (
 
 type Api interface {
 	Push(ctx context.Context, data []byte) (string, error)
-	PushStream(ctx context.Context, stream io.Reader) (string, error)
+	PushStream(ctx context.Context, stream *io.PipeReader) (string, error)
 	Get(ctx context.Context, id string) ([]byte, error)
-	GetStream(ctx context.Context, id string) (io.Reader, error)
+	GetStream(ctx context.Context, id string) (*io.PipeReader, error)
 	Delete(ctx context.Context, id string) (bool, error)
 }
 

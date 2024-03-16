@@ -26,6 +26,8 @@ type MateServiceClient interface {
 	Push(ctx context.Context, in *PushRequest, opts ...grpc.CallOption) (*PushResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	PushStream(ctx context.Context, opts ...grpc.CallOption) (MateService_PushStreamClient, error)
+	GetStream(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (MateService_GetStreamClient, error)
 }
 
 type mateServiceClient struct {
@@ -72,6 +74,72 @@ func (c *mateServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts 
 	return out, nil
 }
 
+func (c *mateServiceClient) PushStream(ctx context.Context, opts ...grpc.CallOption) (MateService_PushStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &MateService_ServiceDesc.Streams[0], "/mate.server.proto.MateService/PushStream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &mateServicePushStreamClient{stream}
+	return x, nil
+}
+
+type MateService_PushStreamClient interface {
+	Send(*PushRequest) error
+	CloseAndRecv() (*PushResponse, error)
+	grpc.ClientStream
+}
+
+type mateServicePushStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *mateServicePushStreamClient) Send(m *PushRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *mateServicePushStreamClient) CloseAndRecv() (*PushResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(PushResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *mateServiceClient) GetStream(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (MateService_GetStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &MateService_ServiceDesc.Streams[1], "/mate.server.proto.MateService/GetStream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &mateServiceGetStreamClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type MateService_GetStreamClient interface {
+	Recv() (*GetResponse, error)
+	grpc.ClientStream
+}
+
+type mateServiceGetStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *mateServiceGetStreamClient) Recv() (*GetResponse, error) {
+	m := new(GetResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // MateServiceServer is the server API for MateService service.
 // All implementations must embed UnimplementedMateServiceServer
 // for forward compatibility
@@ -80,6 +148,8 @@ type MateServiceServer interface {
 	Push(context.Context, *PushRequest) (*PushResponse, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	PushStream(MateService_PushStreamServer) error
+	GetStream(*GetRequest, MateService_GetStreamServer) error
 	mustEmbedUnimplementedMateServiceServer()
 }
 
@@ -98,6 +168,12 @@ func (UnimplementedMateServiceServer) Get(context.Context, *GetRequest) (*GetRes
 }
 func (UnimplementedMateServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedMateServiceServer) PushStream(MateService_PushStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method PushStream not implemented")
+}
+func (UnimplementedMateServiceServer) GetStream(*GetRequest, MateService_GetStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetStream not implemented")
 }
 func (UnimplementedMateServiceServer) mustEmbedUnimplementedMateServiceServer() {}
 
@@ -184,6 +260,53 @@ func _MateService_Delete_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MateService_PushStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(MateServiceServer).PushStream(&mateServicePushStreamServer{stream})
+}
+
+type MateService_PushStreamServer interface {
+	SendAndClose(*PushResponse) error
+	Recv() (*PushRequest, error)
+	grpc.ServerStream
+}
+
+type mateServicePushStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *mateServicePushStreamServer) SendAndClose(m *PushResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *mateServicePushStreamServer) Recv() (*PushRequest, error) {
+	m := new(PushRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _MateService_GetStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MateServiceServer).GetStream(m, &mateServiceGetStreamServer{stream})
+}
+
+type MateService_GetStreamServer interface {
+	Send(*GetResponse) error
+	grpc.ServerStream
+}
+
+type mateServiceGetStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *mateServiceGetStreamServer) Send(m *GetResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // MateService_ServiceDesc is the grpc.ServiceDesc for MateService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -208,6 +331,17 @@ var MateService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _MateService_Delete_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "PushStream",
+			Handler:       _MateService_PushStream_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "GetStream",
+			Handler:       _MateService_GetStream_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "mate-server/proto/mate-server.proto",
 }

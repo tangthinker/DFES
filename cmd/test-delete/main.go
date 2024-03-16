@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/shanliao420/DFES/gateway"
 	"github.com/shanliao420/DFES/gateway/proto"
 	proto2 "github.com/shanliao420/DFES/mate-server/proto"
 	"github.com/shanliao420/DFES/utils"
 	"log"
-	"os"
 )
 
 func main() {
@@ -21,21 +21,24 @@ func main() {
 	log.Println(resp)
 	mateClient := utils.NewMateServerClient(
 		resp.GetProvideService().ServiceAddress.Host + ":" + resp.GetProvideService().ServiceAddress.Port)
-	//b, _ := os.ReadFile("./api/interface.go")
-	gresp, err := mateClient.Get(context.Background(), &proto2.GetRequest{
+
+	dresp, err := mateClient.Delete(context.Background(), &proto2.DeleteRequest{
 		DataId: "mate-node-1.00000000000000000000",
 	})
-	log.Println(err)
-	log.Println(gresp.GetResult)
-	if !gresp.GetResult && gresp.GetCode() == proto2.MateCode_FileNotExist {
-		log.Println("get file not exist")
-		return
-	}
-
-	err = os.WriteFile("./data/test.iso", gresp.Data, 0700)
+	log.Println(dresp)
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println(err)
-	//log.Println(gresp)
+	fmt.Println(dresp)
+	fmt.Println(dresp.LeaderMateServerAddr)
+	if dresp.GetCode() == proto2.MateCode_NotLeader { // 因为选举存在一定延迟，第二次请求也不一定为leader节点，可多次重试
+		leaderClient := utils.NewMateServerClient(dresp.LeaderMateServerAddr)
+		ddresp, err := leaderClient.Delete(context.Background(), &proto2.DeleteRequest{
+			DataId: "mate-node-1.00000000000000000000",
+		})
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Println(ddresp)
+	}
 }

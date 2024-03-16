@@ -66,19 +66,13 @@ func (ms *MateServer) Push(ctx context.Context, data []byte) (string, error) {
 	// 首先获得所有data-node
 	// 然后算出分片分布
 	// push 并存储fragment信息 使用Apply
-	getRes, err := ms.registryCenter.GetProvideServices(ctx, &gatewayPB.GetProvideInfo{
-		ServiceType: gateway.DateService,
-	})
+	fileMateId := ms.idGenerator.Next()
+	dataNodeProviders, err := ms.getDataNodeProviders(ctx)
 	if err != nil {
-		log.Println("get data nodes rpc error:", err)
 		return "", err
 	}
-	if !getRes.GetResult {
-		log.Println("get data nodes logic error:", getRes.GetResult)
-		return "", errors.New("get data nodes logic error")
-	}
-	fragmentCnt := (int64((len(data))/1024) / 1024) / ms.FragmentSize // MB
-	floatCnt := (float64(len(data)) / 1024 / 1024) / float64(ms.FragmentSize)
+	fragmentCnt := int64(len(data)) / ms.FragmentSize // MB
+	floatCnt := float64(len(data)) / float64(ms.FragmentSize)
 	hasRest := strings.Split(fmt.Sprintf("%.1f", floatCnt), ".")[1] == "0"
 	if !hasRest {
 		fragmentCnt++
@@ -88,36 +82,16 @@ func (ms *MateServer) Push(ctx context.Context, data []byte) (string, error) {
 	fileMate.FragmentCnt = fragmentCnt
 	fileMate.Fragments = make(map[int64]*Fragment)
 	for i := int64(0); i < fragmentCnt; i++ {
-		log.Println("push fragment", i, " total:", fragmentCnt)
-		var fragment Fragment
-		fragment.Replicas = make([]FragmentUint, 0)
-		left := i * (ms.FragmentSize * 1024 * 1024)
-		right := left + (ms.FragmentSize * 1024 * 1024)
+		log.Println("handle", fileMateId, " push fragment", i+1, " total:", fragmentCnt)
+		left := i * (ms.FragmentSize)
+		right := left + (ms.FragmentSize)
 		if right >= int64(len(data)) {
 			right = int64(len(data))
 		}
-		idxArr := findMachina(len(getRes.GetProvideServices()), ms.FragmentReplicaSize)
-		for k, idx := range idxArr {
-			log.Println("push fragment idx", k, " to node")
-			target := getRes.GetProvideServices()[idx]
-			targetAddr := target.ServiceAddress.Host + ":" + target.ServiceAddress.Port
-			targetDataNode := dataClientCache.Get(targetAddr).(dataServerPB.DataServiceClient)
-			pushRes, err := targetDataNode.Push(context.Background(), &dataServerPB.PushRequest{
-				FragmentData: data[left:right],
-			})
-			if err != nil {
-				log.Println("push fragment[", left, ":", right, "] rpc error")
-			}
-			fragment.Replicas = append(fragment.Replicas, FragmentUint{
-				FragmentId:   pushRes.FragmentId,
-				DataNodeAddr: targetAddr,
-			})
-			log.Println("push fragment idx", k, " to node successful ")
-		}
-		log.Println("push fragment", i, " successful,  total:", fragmentCnt)
-		fileMate.Fragments[i] = &fragment
+		fragment := ms.pushToDataNode(fileMateId, dataNodeProviders, data[left:right])
+		log.Println("handle", fileMateId, " push fragment", i+1, " successful,  total:", fragmentCnt)
+		fileMate.Fragments[i] = fragment
 	}
-	fileMateId := ms.idGenerator.Next()
 	return fileMateId, ms.applyPush(fileMateId, fileMate)
 }
 
@@ -145,33 +119,21 @@ func findMachina(size int, fragmentReplicaSize int64) []int {
 	return ret
 }
 
-func (ms *MateServer) PushStream(ctx context.Context, stream io.Reader) (string, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (ms *MateServer) Get(ctx context.Context, id string) ([]byte, error) {
 	ms.mutex.RLock()
 	defer ms.mutex.RUnlock()
-	fileMate := ms.FileMates[id]
+	fileMate, ok := ms.FileMates[id]
+	if !ok {
+		return nil, nil
+	}
 	var ret []byte
 	for i := int64(0); i < fileMate.FragmentCnt; i++ {
 		current := fileMate.Fragments[i]
-		for idx, dataNode := range current.Replicas {
-			node := dataClientCache.Get(dataNode.DataNodeAddr).(dataServerPB.DataServiceClient)
-			getResp, err := node.Get(ctx, &dataServerPB.GetRequest{
-				FragmentId: dataNode.FragmentId,
-			})
-			if err != nil {
-				log.Println("get fragment from node", dataNode.DataNodeAddr, " rpc error", err)
-				if idx == len(current.Replicas)-1 { // 已经到最后一个了，最后一个也出现了错误，文件无法复原
-					return nil, err
-				}
-				continue
-			}
-			ret = append(ret, getResp.FragmentData...)
-			break
+		data, err := ms.getFromDataNode(ctx, current)
+		if err != nil {
+			return nil, err
 		}
+		ret = append(ret, data...)
 	}
 	if fileMate.SourceHashCode != utils.Hash(ret) {
 		return nil, errors.New("GetData hash not equal source hash code")
@@ -179,16 +141,87 @@ func (ms *MateServer) Get(ctx context.Context, id string) ([]byte, error) {
 	return ret, nil
 }
 
-func (ms *MateServer) GetStream(ctx context.Context, id string) (io.Reader, error) {
-	//TODO implement me
-	panic("implement me")
+func (ms *MateServer) PushStream(ctx context.Context, stream *io.PipeReader) (string, error) {
+	var bytes []byte
+	var fileMate FileMate
+	fileMate.Fragments = make(map[int64]*Fragment)
+	fileMateId := ms.idGenerator.Next()
+	hashCoder := utils.NewHashCoder()
+	dataNodeProviders, err := ms.getDataNodeProviders(ctx)
+	if err != nil {
+		return "", err
+	}
+	for {
+		var buff []byte
+		n, err := stream.Read(buff)
+		if err == io.EOF {
+			if len(bytes) != 0 {
+				fragment := ms.pushToDataNode(fileMateId, dataNodeProviders, bytes[:])
+				hashCoder.Join(bytes)
+				fileMate.Fragments[fileMate.FragmentCnt] = fragment
+				fileMate.FragmentCnt++
+			}
+			break
+		}
+		if err != nil {
+			log.Println("read data from stream error:", err)
+			break
+		}
+		bytes = append(bytes, buff[:n]...)
+		if int64(len(bytes)) >= ms.FragmentSize {
+			fragment := ms.pushToDataNode(fileMateId, dataNodeProviders, bytes[:ms.FragmentSize])
+			hashCoder.Join(bytes[:ms.FragmentSize])
+			bytes = bytes[:ms.FragmentSize]
+			fileMate.Fragments[fileMate.FragmentCnt] = fragment
+			fileMate.FragmentCnt++
+		}
+	}
+	fileMate.SourceHashCode = hashCoder.Get()
+	err = ms.applyPush(fileMateId, fileMate)
+	return fileMateId, err
+}
+
+func (ms *MateServer) GetStream(ctx context.Context, id string) (*io.PipeReader, error) {
+	ms.mutex.RLock()
+	fileMate, ok := ms.FileMates[id]
+	ms.mutex.RUnlock()
+	if !ok {
+		return nil, nil
+	}
+	hashCoder := utils.NewHashCoder()
+	r, w := io.Pipe()
+	go func() {
+		defer func(w *io.PipeWriter) {
+			_ = w.Close()
+		}(w)
+		for i, fragment := range fileMate.Fragments {
+			data, err := ms.getFromDataNode(ctx, fragment)
+			if err != nil {
+				log.Println("get data from data node err:", err)
+				_ = w.CloseWithError(err)
+				return
+			}
+			_, _ = w.Write(data)
+			hashCoder.Join(data)
+			log.Println("get data from node successful i:", i)
+		}
+		// hashcode := hashCoder.Get()
+		//if hashcode != fileMate.SourceHashCode {
+		//	_ = w.CloseWithError(errors.New("get data hash code not equal source hash code"))
+		//}
+		log.Println("get data thread end")
+	}()
+	return r, nil
 }
 
 func (ms *MateServer) Delete(ctx context.Context, id string) (bool, error) {
 	// 先删掉元信息mate，再删除dataNode上的真实文件
 	ms.mutex.RLock()
-	fileMate := ms.FileMates[id]
+	fileMate, ok := ms.FileMates[id]
 	ms.mutex.RUnlock()
+	if !ok {
+		return false, nil
+	}
 	err := ms.applyDelete(id)
 	if err != nil {
 		return false, err
@@ -207,6 +240,63 @@ func (ms *MateServer) Delete(ctx context.Context, id string) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+func (ms *MateServer) getDataNodeProviders(ctx context.Context) ([]*gatewayPB.RegisterInfo, error) {
+	getRes, err := ms.registryCenter.GetProvideServices(ctx, &gatewayPB.GetProvideInfo{
+		ServiceType: gateway.DateService,
+	})
+	if err != nil {
+		log.Println("get data nodes rpc error:", err)
+		return nil, err
+	}
+	if !getRes.GetResult {
+		log.Println("get data nodes logic error:", getRes.GetResult)
+		return nil, errors.New("get data nodes logic error")
+	}
+	return getRes.GetProvideServices(), nil
+}
+
+func (ms *MateServer) pushToDataNode(fileMateId string, dataNodeProviders []*gatewayPB.RegisterInfo, data []byte) *Fragment {
+	idxArr := findMachina(len(dataNodeProviders), ms.FragmentReplicaSize)
+	var fragment Fragment
+	fragment.Replicas = make([]FragmentUint, 0)
+	for k, idx := range idxArr {
+		log.Println("handle", fileMateId, " push fragment idx", k+1, " to node")
+		target := dataNodeProviders[idx]
+		targetAddr := target.ServiceAddress.Host + ":" + target.ServiceAddress.Port
+		targetDataNode := dataClientCache.Get(targetAddr).(dataServerPB.DataServiceClient)
+		pushRes, err := targetDataNode.Push(context.Background(), &dataServerPB.PushRequest{
+			FragmentData: data,
+		})
+		if err != nil {
+			log.Println("push fragment rpc error")
+		}
+		fragment.Replicas = append(fragment.Replicas, FragmentUint{
+			FragmentId:   pushRes.FragmentId,
+			DataNodeAddr: targetAddr,
+		})
+		log.Println("handle", fileMateId, " push fragment idx", k+1, " to node successful ")
+	}
+	return &fragment
+}
+
+func (ms *MateServer) getFromDataNode(ctx context.Context, fragment *Fragment) ([]byte, error) {
+	for idx, dataNode := range fragment.Replicas {
+		node := dataClientCache.Get(dataNode.DataNodeAddr).(dataServerPB.DataServiceClient)
+		getResp, err := node.Get(ctx, &dataServerPB.GetRequest{
+			FragmentId: dataNode.FragmentId,
+		})
+		if err != nil {
+			log.Println("get fragment from node", dataNode.DataNodeAddr, " rpc error", err)
+			if idx == len(fragment.Replicas)-1 { // 已经到最后一个了，最后一个也出现了错误，文件无法复原
+				return nil, err
+			}
+			continue
+		}
+		return getResp.FragmentData, nil
+	}
+	return nil, nil // never reach
 }
 
 func (ms *MateServer) applyDelete(mateId string) error {
