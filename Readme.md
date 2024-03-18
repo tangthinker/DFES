@@ -3,7 +3,7 @@ Distributed File Encryption System
 
 Distributed file encryption system implement by golang.
 
-DFES is a distributed system using the following features to implement:
+DFES is a distributed system using the following component to implement:
 1. [Protocol buff](https://github.com/protocolbuffers/protobuf)
 2. [gRPC](https://github.com/grpc/grpc)
 3. [Raft](https://github.com/hashicorp/raft)
@@ -12,12 +12,12 @@ DFES is a distributed system using the following features to implement:
 
 Feature
 -------
-1. distributed system.
-2. mate-server through raft protocol implement CP architecture.
-3. data-server through Quorum NRW implement AP architecture.
-4. using registry center manager all server information.
-5. using gRPC implement the communication among services.
-6. using multi-fragment to implement high availability.
+1. Distributed system.
+2. Mate-Server through raft protocol implement CP architecture.
+3. Data-Server through Quorum NRW implement AP architecture.
+4. Using Registry-Center manager all server information.
+5. Using gRPC implement the communication among services.
+6. Using one fragment with multiple replicas which distributed in different machines to implement high availability.
 
 Quick start
 -----------
