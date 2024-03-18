@@ -28,6 +28,8 @@ type MateServiceClient interface {
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 	PushStream(ctx context.Context, opts ...grpc.CallOption) (MateService_PushStreamClient, error)
 	GetStream(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (MateService_GetStreamClient, error)
+	IsLeader(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*IsLeaderResponse, error)
+	IsDataExists(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*IsDataExistsResponse, error)
 }
 
 type mateServiceClient struct {
@@ -140,6 +142,24 @@ func (x *mateServiceGetStreamClient) Recv() (*GetResponse, error) {
 	return m, nil
 }
 
+func (c *mateServiceClient) IsLeader(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*IsLeaderResponse, error) {
+	out := new(IsLeaderResponse)
+	err := c.cc.Invoke(ctx, "/mate.server.proto.MateService/IsLeader", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mateServiceClient) IsDataExists(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*IsDataExistsResponse, error) {
+	out := new(IsDataExistsResponse)
+	err := c.cc.Invoke(ctx, "/mate.server.proto.MateService/IsDataExists", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MateServiceServer is the server API for MateService service.
 // All implementations must embed UnimplementedMateServiceServer
 // for forward compatibility
@@ -150,6 +170,8 @@ type MateServiceServer interface {
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	PushStream(MateService_PushStreamServer) error
 	GetStream(*GetRequest, MateService_GetStreamServer) error
+	IsLeader(context.Context, *Empty) (*IsLeaderResponse, error)
+	IsDataExists(context.Context, *GetRequest) (*IsDataExistsResponse, error)
 	mustEmbedUnimplementedMateServiceServer()
 }
 
@@ -174,6 +196,12 @@ func (UnimplementedMateServiceServer) PushStream(MateService_PushStreamServer) e
 }
 func (UnimplementedMateServiceServer) GetStream(*GetRequest, MateService_GetStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetStream not implemented")
+}
+func (UnimplementedMateServiceServer) IsLeader(context.Context, *Empty) (*IsLeaderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsLeader not implemented")
+}
+func (UnimplementedMateServiceServer) IsDataExists(context.Context, *GetRequest) (*IsDataExistsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsDataExists not implemented")
 }
 func (UnimplementedMateServiceServer) mustEmbedUnimplementedMateServiceServer() {}
 
@@ -307,6 +335,42 @@ func (x *mateServiceGetStreamServer) Send(m *GetResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _MateService_IsLeader_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MateServiceServer).IsLeader(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mate.server.proto.MateService/IsLeader",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MateServiceServer).IsLeader(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MateService_IsDataExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MateServiceServer).IsDataExists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mate.server.proto.MateService/IsDataExists",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MateServiceServer).IsDataExists(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MateService_ServiceDesc is the grpc.ServiceDesc for MateService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -329,6 +393,14 @@ var MateService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _MateService_Delete_Handler,
+		},
+		{
+			MethodName: "IsLeader",
+			Handler:    _MateService_IsLeader_Handler,
+		},
+		{
+			MethodName: "IsDataExists",
+			Handler:    _MateService_IsDataExists_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -12,6 +12,21 @@ service MateService{
 
   rpc PushStream(stream PushRequest) returns (PushResponse) {}
   rpc GetStream(GetRequest) returns (stream GetResponse) {}
+
+  rpc IsLeader(Empty) returns (IsLeaderResponse) {}
+  rpc IsDataExists(GetRequest) returns (IsDataExistsResponse) {}
+}
+
+message Empty{
+}
+
+message IsLeaderResponse {
+  bool isLeader = 1;
+  string LeaderMateServerAddr = 2;
+}
+
+message IsDataExistsResponse {
+  bool isDataExists = 1;
 }
 
 message JoinRequest {

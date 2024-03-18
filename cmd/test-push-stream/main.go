@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/shanliao420/DFES/gateway"
 	"github.com/shanliao420/DFES/gateway/proto"
 	proto2 "github.com/shanliao420/DFES/mate-server/proto"
 	"github.com/shanliao420/DFES/utils"
 	"log"
+	"os"
 )
 
 func main() {
@@ -21,24 +21,32 @@ func main() {
 	log.Println(resp)
 	mateClient := utils.NewMateServerClient(
 		resp.GetProvideService().ServiceAddress.Host + ":" + resp.GetProvideService().ServiceAddress.Port)
+	b, _ := os.ReadFile("/Users/tangyubin/Downloads/Win10_22H2_English_x64v1.iso")
 
-	dresp, err := mateClient.Delete(context.Background(), &proto2.DeleteRequest{
-		DataId: "1769661300763295744",
-	})
-	log.Println(dresp)
+	presp, err := mateClient.PushStream(context.Background())
+	log.Println(presp)
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(dresp)
-	fmt.Println(dresp.LeaderMateServerAddr)
-	if dresp.GetCode() == proto2.MateCode_NotLeader { // 因为选举存在一定延迟，第二次请求也不一定为leader节点，可多次重试
-		leaderClient := utils.NewMateServerClient(dresp.LeaderMateServerAddr)
-		ddresp, err := leaderClient.Delete(context.Background(), &proto2.DeleteRequest{
-			DataId: "mate-node-1.00000000000000000000",
+	blen := len(b)
+	fragmentSize := 24 * 1024 * 1024
+	left := 0
+	right := fragmentSize
+	for right <= blen {
+		_ = presp.Send(&proto2.PushRequest{
+			Data: b[left:right],
 		})
-		if err != nil {
-			log.Fatalln(err)
-		}
-		fmt.Println(ddresp)
+		log.Println("send data [", left, ":", right, "]")
+		left = right
+		right += fragmentSize
 	}
+	if left < blen && right != blen {
+		_ = presp.Send(&proto2.PushRequest{
+			Data: b[left:blen],
+		})
+		log.Println("send data [", left, ":", blen, "]")
+	}
+	pusresp, err := presp.CloseAndRecv()
+	log.Println(err)
+	log.Println(pusresp)
 }

@@ -131,13 +131,14 @@ func (RpcServer) GetStream(in *pb.GetRequest, stream pb.MateService_GetStreamSer
 	}
 	if r == nil {
 		_ = stream.Send(&pb.GetResponse{
+			Data:      []byte("placeholder"),
 			GetResult: false,
 			Code:      pb.MateCode_FileNotExist,
 		})
 		return nil
 	}
 	for {
-		var buff []byte
+		buff := make([]byte, mateServer.FragmentSize)
 		n, err := r.Read(buff)
 		if err == io.EOF {
 			return nil
@@ -155,4 +156,17 @@ func (RpcServer) GetStream(in *pb.GetRequest, stream pb.MateService_GetStreamSer
 			Code:      pb.MateCode_Success,
 		})
 	}
+}
+
+func (RpcServer) IsLeader(ctx context.Context, in *pb.Empty) (*pb.IsLeaderResponse, error) {
+	return &pb.IsLeaderResponse{
+		IsLeader:             mateServer.IsLeader(),
+		LeaderMateServerAddr: mateServer.leaderRpcAddr,
+	}, nil
+}
+
+func (RpcServer) IsDataExists(ctx context.Context, in *pb.GetRequest) (*pb.IsDataExistsResponse, error) {
+	return &pb.IsDataExistsResponse{
+		IsDataExists: mateServer.IsDataExists(in.DataId),
+	}, nil
 }

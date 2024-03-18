@@ -62,6 +62,13 @@ func (ms *MateServer) GetLeaderInfo() (raft.ServerAddress, raft.ServerID) {
 	return leaderAddr, leaderServerName
 }
 
+func (ms *MateServer) IsDataExists(dataId string) bool {
+	ms.mutex.RLock()
+	defer ms.mutex.RUnlock()
+	_, ok := ms.FileMates[dataId]
+	return ok
+}
+
 func (ms *MateServer) Push(ctx context.Context, data []byte) (string, error) {
 	// 首先获得所有data-node
 	// 然后算出分片分布
@@ -142,7 +149,6 @@ func (ms *MateServer) Get(ctx context.Context, id string) ([]byte, error) {
 }
 
 func (ms *MateServer) PushStream(ctx context.Context, stream *io.PipeReader) (string, error) {
-	var bytes []byte
 	var fileMate FileMate
 	fileMate.Fragments = make(map[int64]*Fragment)
 	fileMateId := ms.idGenerator.Next()
@@ -152,29 +158,27 @@ func (ms *MateServer) PushStream(ctx context.Context, stream *io.PipeReader) (st
 		return "", err
 	}
 	for {
-		var buff []byte
+		buff := make([]byte, ms.FragmentSize)
 		n, err := stream.Read(buff)
 		if err == io.EOF {
-			if len(bytes) != 0 {
-				fragment := ms.pushToDataNode(fileMateId, dataNodeProviders, bytes[:])
-				hashCoder.Join(bytes)
-				fileMate.Fragments[fileMate.FragmentCnt] = fragment
-				fileMate.FragmentCnt++
-			}
+			//if n != 0 {
+			//	fragment := ms.pushToDataNode(fileMateId, dataNodeProviders, buff[:n])
+			//	hashCoder.Join(buff[:n])
+			//	fileMate.Fragments[fileMate.FragmentCnt] = fragment
+			//	fileMate.FragmentCnt++
+			//}
 			break
 		}
 		if err != nil {
 			log.Println("read data from stream error:", err)
 			break
 		}
-		bytes = append(bytes, buff[:n]...)
-		if int64(len(bytes)) >= ms.FragmentSize {
-			fragment := ms.pushToDataNode(fileMateId, dataNodeProviders, bytes[:ms.FragmentSize])
-			hashCoder.Join(bytes[:ms.FragmentSize])
-			bytes = bytes[:ms.FragmentSize]
-			fileMate.Fragments[fileMate.FragmentCnt] = fragment
-			fileMate.FragmentCnt++
-		}
+
+		fragment := ms.pushToDataNode(fileMateId, dataNodeProviders, buff[:n])
+		hashCoder.Join(buff[:n])
+		fileMate.Fragments[fileMate.FragmentCnt] = fragment
+		fileMate.FragmentCnt++
+
 	}
 	fileMate.SourceHashCode = hashCoder.Get()
 	err = ms.applyPush(fileMateId, fileMate)
@@ -194,8 +198,8 @@ func (ms *MateServer) GetStream(ctx context.Context, id string) (*io.PipeReader,
 		defer func(w *io.PipeWriter) {
 			_ = w.Close()
 		}(w)
-		for i, fragment := range fileMate.Fragments {
-			data, err := ms.getFromDataNode(ctx, fragment)
+		for i := int64(0); i < fileMate.FragmentCnt; i++ {
+			data, err := ms.getFromDataNode(ctx, fileMate.Fragments[i])
 			if err != nil {
 				log.Println("get data from data node err:", err)
 				_ = w.CloseWithError(err)
@@ -205,10 +209,10 @@ func (ms *MateServer) GetStream(ctx context.Context, id string) (*io.PipeReader,
 			hashCoder.Join(data)
 			log.Println("get data from node successful i:", i)
 		}
-		// hashcode := hashCoder.Get()
-		//if hashcode != fileMate.SourceHashCode {
-		//	_ = w.CloseWithError(errors.New("get data hash code not equal source hash code"))
-		//}
+		hashcode := hashCoder.Get()
+		if hashcode != fileMate.SourceHashCode {
+			_ = w.CloseWithError(errors.New("get data hash code not equal source hash code"))
+		}
 		log.Println("get data thread end")
 	}()
 	return r, nil
