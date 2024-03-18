@@ -25,7 +25,7 @@ Quick start
     ```shell
     go mod tidy
     ```
-2. Start Registry-Center in a terminal window.
+2. Start **Registry-Center** in a terminal window.
    ```shell
    go run cmd/registry/main.go 
    ```
