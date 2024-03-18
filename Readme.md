@@ -7,7 +7,7 @@ DFES is a distributed system using the following features to implement:
 1. [Protocol buff](https://github.com/protocolbuffers/protobuf)
 2. [gRPC](https://github.com/grpc/grpc)
 3. [Raft](https://github.com/hashicorp/raft)
-4. asymmetric/symmetric encryption
+4. Asymmetric/Symmetric encryption
 5. [LRU cache](https://github.com/hashicorp/golang-lru)
 
 Feature
