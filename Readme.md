@@ -25,22 +25,26 @@ Quick start
     ```shell
     go mod tidy
     ```
-2. Start leader Mate-Server in a terminal window
+2. Start Registry-Center in a terminal window.
+   ```shell
+   go run cmd/registry/main.go 
+   ```
+3. Start **Leader** **Mate-Server** in a terminal window
     ```shell
     go run cmd/mate-server/main.go -port 7001 -server-name mate-node-1 -raft-addr "127.0.0.1:9001" -leader-addr ""
     ```
-3. Start follower Mater-Server in other terminal window (optional)
+4. Start **Follower** **Mater-Server** in other terminal window (optional)
     ```shell
     go run cmd/mate-server/main.go -port 7002 -server-name mate-node-2 -raft-addr "127.0.0.1:9002" -leader-addr "127.0.0.1:7001"
     go run cmd/mate-server/main.go -port 7003 -server-name mate-node-3 -raft-addr "127.0.0.1:9003" -leader-addr "127.0.0.1:7001"
     ```
-4. Start Data-Server in other terminal window
+5. Start **Data-Server** in other terminal window
     ```shell
     go run cmd/data-server/main.go -port 8001 -server-name "data-node-1"
     go run cmd/data-server/main.go -port 8002 -server-name "data-node-2"
     go run cmd/data-server/main.go -port 8003 -server-name "data-node-3"
     ```
-5. Test your server, you can use the given example in cmd/test-*, have fun.
+6. Test your server, you can use the given example in cmd/test-*, have fun.
 
 Structure
 ---------
