@@ -17,7 +17,7 @@ Feature
 3. Data-Server through Quorum NRW implement AP architecture.
 4. Using Registry-Center manager all server information.
 5. Using gRPC implement the communication among services.
-6. Using one fragment with multiple replicas which distributed in different machines to implement high availability.
+6. Using one fragment with multiple replicas which is distributed in different machines to implement high availability.
 
 Quick start
 -----------
