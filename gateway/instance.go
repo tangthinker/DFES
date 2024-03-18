@@ -48,3 +48,9 @@ func GetByServiceName(serviceName ServiceName) (RegisterInfo, bool) {
 	}
 	return RegisterInfo{}, ok
 }
+
+func GetHistoryAllServiceCnt() int64 {
+	registryStore.mutex.RLock()
+	defer registryStore.mutex.RUnlock()
+	return registryStore.continuouslyIncreasingNumber
+}

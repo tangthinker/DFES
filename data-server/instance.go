@@ -1,8 +1,10 @@
 package data_server
 
 import (
+	"context"
 	"github.com/shanliao420/DFES/encryption"
 	pb "github.com/shanliao420/DFES/gateway/proto"
+	idGenerator "github.com/shanliao420/DFES/id-generator"
 	"github.com/shanliao420/DFES/utils"
 	"log"
 	"os"
@@ -26,11 +28,16 @@ func Init() {
 	pri, pub := getKey(DefaultKeyStorePath)
 	dataService.privateKey = pri
 	dataService.publicKey = pub
+	serviceCnt, err := registerClient.GetHistoryAllServiceCnt(context.Background(), nil)
+	if err != nil {
+		log.Fatalln("init data service in id node err:", err)
+	}
+	log.Println("init mate server id node -> ", serviceCnt.GetServiceCnt())
+	dataService.idGen = idGenerator.NewSnowflakeIdGenerator(serviceCnt.ServiceCnt)
 }
 
 func SetDataServerName(serverName string) {
 	dataService.serverName = serverName
-	dataService.idGen.ResetPrefix(serverName)
 	dataService.storePath = DefaultDataStorePath + serverName + "/"
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/shanliao420/DFES/gateway"
+	id_generator "github.com/shanliao420/DFES/id-generator"
 	mateServerPB "github.com/shanliao420/DFES/mate-server/proto"
 	"github.com/shanliao420/DFES/utils"
 	"log"
@@ -30,6 +31,12 @@ func init() {
 		addr := key.(string)
 		return utils.NewDataServerClient(addr)
 	})
+	serviceCnt, err := mateServer.registryCenter.GetHistoryAllServiceCnt(context.Background(), nil)
+	if err != nil {
+		log.Fatalln("init mate server in id node err:", err)
+	}
+	log.Println("init mate server id node -> ", serviceCnt.GetServiceCnt())
+	mateServer.idGenerator = id_generator.NewSnowflakeIdGenerator(serviceCnt.ServiceCnt)
 }
 
 func InitRaft(firstNodeOrSingleMode bool) {
@@ -77,7 +84,6 @@ func SetLocalRpcAddr(localRpcAddr string) {
 
 func SetServerName(serverName string) {
 	mateServer.ServerName = serverName
-	mateServer.idGenerator.ResetPrefix(serverName)
 	SetRaftDir(mateServer.raftDir + serverName + "/")
 }
 

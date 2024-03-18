@@ -37,7 +37,7 @@ type MateServer struct {
 
 	FileMates map[string]FileMate // file dataId -> FileMate
 
-	idGenerator *idGenerator.SequenceIdGenerator
+	idGenerator idGenerator.IdGenerator
 
 	registryCenter gatewayPB.RegistryClient
 
@@ -367,7 +367,6 @@ func NewMateServer(raftDir string, retainSnapshotCount int, raftAddr string,
 		ServerName:          serverName,
 		mutex:               &sync.RWMutex{},
 		FileMates:           make(map[string]FileMate),
-		idGenerator:         idGenerator.NewSequenceIdGenerator(serverName),
 		FragmentSize:        fragmentSize,
 		FragmentReplicaSize: fragmentReplicaSize,
 	}

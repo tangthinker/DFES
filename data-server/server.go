@@ -12,7 +12,7 @@ import (
 
 const (
 	DefaultDataStorePath = "./data/"
-	RegistryAddr         = "127.0.0.1:60001"
+	RegistryAddr         = "127.0.0.1:6001"
 )
 
 type DataServer struct {
@@ -22,7 +22,7 @@ type DataServer struct {
 	storePath           string
 	asymmetricEncryptor *encryption.AsymmetricEncryptor
 	symmetricEncryptor  *encryption.SymmetricEncryptor
-	idGen               *idGenerator.SequenceIdGenerator
+	idGen               idGenerator.IdGenerator
 }
 
 func NewDataServer(privateKey []byte, publicKey []byte, idPrefix string) *DataServer {
@@ -31,7 +31,6 @@ func NewDataServer(privateKey []byte, publicKey []byte, idPrefix string) *DataSe
 		publicKey:           publicKey,
 		asymmetricEncryptor: &encryption.AsymmetricEncryptor{},
 		symmetricEncryptor:  &encryption.SymmetricEncryptor{},
-		idGen:               idGenerator.NewSequenceIdGenerator(idPrefix),
 	}
 }
 

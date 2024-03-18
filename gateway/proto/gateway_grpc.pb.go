@@ -29,6 +29,7 @@ type RegistryClient interface {
 	GetProvideService(ctx context.Context, in *GetProvideInfo, opts ...grpc.CallOption) (*GetProvideResp, error)
 	// rpc GetLeaderMate (Empty) returns (GetProvideResp) {}
 	GetProvideByName(ctx context.Context, in *GetByNameInfo, opts ...grpc.CallOption) (*GetProvideResp, error)
+	GetHistoryAllServiceCnt(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetServiceCntResp, error)
 }
 
 type registryClient struct {
@@ -93,6 +94,15 @@ func (c *registryClient) GetProvideByName(ctx context.Context, in *GetByNameInfo
 	return out, nil
 }
 
+func (c *registryClient) GetHistoryAllServiceCnt(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetServiceCntResp, error) {
+	out := new(GetServiceCntResp)
+	err := c.cc.Invoke(ctx, "/proto.Registry/GetHistoryAllServiceCnt", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RegistryServer is the server API for Registry service.
 // All implementations must embed UnimplementedRegistryServer
 // for forward compatibility
@@ -104,6 +114,7 @@ type RegistryServer interface {
 	GetProvideService(context.Context, *GetProvideInfo) (*GetProvideResp, error)
 	// rpc GetLeaderMate (Empty) returns (GetProvideResp) {}
 	GetProvideByName(context.Context, *GetByNameInfo) (*GetProvideResp, error)
+	GetHistoryAllServiceCnt(context.Context, *Empty) (*GetServiceCntResp, error)
 	mustEmbedUnimplementedRegistryServer()
 }
 
@@ -128,6 +139,9 @@ func (UnimplementedRegistryServer) GetProvideService(context.Context, *GetProvid
 }
 func (UnimplementedRegistryServer) GetProvideByName(context.Context, *GetByNameInfo) (*GetProvideResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProvideByName not implemented")
+}
+func (UnimplementedRegistryServer) GetHistoryAllServiceCnt(context.Context, *Empty) (*GetServiceCntResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryAllServiceCnt not implemented")
 }
 func (UnimplementedRegistryServer) mustEmbedUnimplementedRegistryServer() {}
 
@@ -250,6 +264,24 @@ func _Registry_GetProvideByName_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Registry_GetHistoryAllServiceCnt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServer).GetHistoryAllServiceCnt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Registry/GetHistoryAllServiceCnt",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServer).GetHistoryAllServiceCnt(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Registry_ServiceDesc is the grpc.ServiceDesc for Registry service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -280,6 +312,10 @@ var Registry_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetProvideByName",
 			Handler:    _Registry_GetProvideByName_Handler,
+		},
+		{
+			MethodName: "GetHistoryAllServiceCnt",
+			Handler:    _Registry_GetHistoryAllServiceCnt_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

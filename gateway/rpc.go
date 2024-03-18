@@ -79,6 +79,12 @@ func (s *RpcServer) GetProvideByName(ctx context.Context, in *pb.GetByNameInfo) 
 	}, nil
 }
 
+func (s *RpcServer) GetHistoryAllServiceCnt(ctx context.Context, in *pb.Empty) (*pb.GetServiceCntResp, error) {
+	return &pb.GetServiceCntResp{
+		ServiceCnt: GetHistoryAllServiceCnt(),
+	}, nil
+}
+
 func transRpcInfo2RegisterInfo(rpcInfo *pb.RegisterInfo) RegisterInfo {
 	return RegisterInfo{
 		ServiceName: ServiceName(rpcInfo.ServiceName),

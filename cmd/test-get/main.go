@@ -23,7 +23,7 @@ func main() {
 		resp.GetProvideService().ServiceAddress.Host + ":" + resp.GetProvideService().ServiceAddress.Port)
 	//b, _ := os.ReadFile("./api/interface.go")
 	gresp, err := mateClient.Get(context.Background(), &proto2.GetRequest{
-		DataId: "mate-node-1.00000000000000000000",
+		DataId: "1769566743526670336",
 	})
 	log.Println(err)
 	log.Println(gresp.GetResult)
@@ -32,7 +32,7 @@ func main() {
 		return
 	}
 
-	err = os.WriteFile("./data/test.iso", gresp.Data, 0700)
+	err = os.WriteFile("./data/test.dmg", gresp.Data, 0700)
 	if err != nil {
 		log.Println(err)
 	}

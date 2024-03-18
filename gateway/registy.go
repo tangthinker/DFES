@@ -13,8 +13,9 @@ const (
 )
 
 type registry struct {
-	onlineService map[ServiceName]*RegisterInfo
-	mutex         *sync.RWMutex
+	onlineService                map[ServiceName]*RegisterInfo
+	mutex                        *sync.RWMutex
+	continuouslyIncreasingNumber int64
 }
 
 func (r *registry) Register(registerInfo RegisterInfo) error {
@@ -24,6 +25,7 @@ func (r *registry) Register(registerInfo RegisterInfo) error {
 	registerInfo.HeartbeatTimer = timer
 	r.onlineService[registerInfo.ServiceName] = &registerInfo
 	log.Println("register", registerInfo.ServiceName, "successful")
+	r.continuouslyIncreasingNumber++
 	go func() {
 		for {
 			select {

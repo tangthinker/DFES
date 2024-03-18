@@ -13,6 +13,7 @@ service Registry {
   rpc GetProvideService (GetProvideInfo) returns (GetProvideResp) {}
 //  rpc GetLeaderMate (Empty) returns (GetProvideResp) {}
   rpc GetProvideByName (GetByNameInfo) returns (GetProvideResp) {}
+  rpc GetHistoryAllServiceCnt(Empty) returns (GetServiceCntResp) {}
 }
 
 message GetProvideInfo {
@@ -77,4 +78,8 @@ message HeartbeatInfo {
 
 message HeartbeatResp {
   bool HeartBeatResult = 1;
+}
+
+message GetServiceCntResp {
+  int64 ServiceCnt = 1;
 }
