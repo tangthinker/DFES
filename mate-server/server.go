@@ -173,7 +173,7 @@ func (ms *MateServer) PushStream(ctx context.Context, stream *io.PipeReader) (st
 			log.Println("read data from stream error:", err)
 			break
 		}
-
+		log.Println("handle", fileMateId, " push data to dat-node i:", fileMate.FragmentCnt)
 		fragment := ms.pushToDataNode(fileMateId, dataNodeProviders, buff[:n])
 		hashCoder.Join(buff[:n])
 		fileMate.Fragments[fileMate.FragmentCnt] = fragment

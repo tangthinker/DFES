@@ -4,7 +4,6 @@ import (
 	"context"
 	pb "github.com/shanliao420/DFES/mate-server/proto"
 	"io"
-	"log"
 )
 
 type RpcServer struct {
@@ -119,7 +118,6 @@ func (RpcServer) PushStream(stream pb.MateService_PushStreamServer) error {
 		if err != nil {
 			return err
 		}
-		log.Println("receive data")
 		_, _ = w.Write(req.Data)
 	}
 }
