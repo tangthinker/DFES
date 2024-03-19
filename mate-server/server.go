@@ -128,8 +128,8 @@ func findMachina(size int, fragmentReplicaSize int64) []int {
 
 func (ms *MateServer) Get(ctx context.Context, id string) ([]byte, error) {
 	ms.mutex.RLock()
-	defer ms.mutex.RUnlock()
 	fileMate, ok := ms.FileMates[id]
+	ms.mutex.RUnlock()
 	if !ok {
 		return nil, nil
 	}

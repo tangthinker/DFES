@@ -25,7 +25,7 @@ var mateServer = NewMateServer(DefaultRaftDir, DefaultRetainSnapshotCount, Defau
 
 var dataClientCache = utils.NewActionCache(DefaultDataClientCacheSize)
 
-func init() {
+func Init() {
 	mateServer.registryCenter = utils.NewRegistryClient(gateway.DefaultRegistryServerAddr)
 	dataClientCache.RegisterGetFunc(func(key interface{}) interface{} {
 		addr := key.(string)

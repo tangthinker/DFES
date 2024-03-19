@@ -33,6 +33,7 @@ func main() {
 		HeartbeatAddress:  "",
 	})
 	localAddr := *host + ":" + *port
+	mateServer.Init()
 	mateServer.SetServerName(*serverName)
 	mateServer.SetLocalRpcAddr(localAddr)
 	mateServer.SetRaftAddr(*raftAddr)

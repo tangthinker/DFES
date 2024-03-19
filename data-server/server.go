@@ -1,7 +1,8 @@
 package data_server
 
 import (
-	"encoding/json"
+	"bytes"
+	"encoding/gob"
 	"github.com/shanliao420/DFES/encryption"
 	idGenerator "github.com/shanliao420/DFES/id-generator"
 	"github.com/shanliao420/DFES/utils"
@@ -57,9 +58,9 @@ func (ds *DataServer) Delete(id string) bool {
 }
 
 func store(path string, fragment *Fragment) {
-	b, err := json.Marshal(fragment)
+	b, err := serialize(fragment)
 	if err != nil {
-		log.Println("json marshal error:", err)
+		log.Println("serialize to binary err:", err)
 		return
 	}
 	filename := "data." + fragment.FragmentId
@@ -89,12 +90,12 @@ func restore(path string, id string) *Fragment {
 		log.Println("read file error:", err)
 		return nil
 	}
-	var fragment Fragment
-	err = json.Unmarshal(b, &fragment)
+	fragment, err := deserialize(b)
 	if err != nil {
-		log.Println("json unmarshal error:", err)
+		log.Println("deserialize to struct err:", err)
+		return nil
 	}
-	return &fragment
+	return fragment
 }
 
 func deleteById(path string, id string) error {
@@ -105,4 +106,25 @@ func deleteById(path string, id string) error {
 		return err
 	}
 	return nil
+}
+
+func serialize(fragment *Fragment) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	enc := gob.NewEncoder(buf)
+	err := enc.Encode(fragment)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func deserialize(b []byte) (*Fragment, error) {
+	var fragment Fragment
+	buf := bytes.NewBuffer(b)
+	dec := gob.NewDecoder(buf)
+	err := dec.Decode(&fragment)
+	if err != nil {
+		return nil, err
+	}
+	return &fragment, nil
 }
