@@ -18,12 +18,11 @@ const (
 
 var (
 	registerClient pb.RegistryClient
-	ServerHost     string
-	ServerPort     string
-	dataService    *DataServer = NewDataServer(nil, nil, DefaultServerName)
+	dataService    *DataServer
 )
 
 func Init() {
+	dataService = NewDataServer(nil, nil, DefaultServerName)
 	registerClient = pb.NewRegistryClient(utils.NewGrpcClient(RegistryAddr))
 	pri, pub := getKey(DefaultKeyStorePath)
 	dataService.privateKey = pri

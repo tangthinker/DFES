@@ -6,9 +6,13 @@ import (
 	"sync"
 )
 
-var registryStore = &registry{
-	onlineService: make(map[ServiceName]*RegisterInfo),
-	mutex:         &sync.RWMutex{},
+var registryStore *registry
+
+func Init() {
+	registryStore = &registry{
+		onlineService: make(map[ServiceName]*RegisterInfo),
+		mutex:         &sync.RWMutex{},
+	}
 }
 
 func GetProvideService(serviceType ServiceType) (RegisterInfo, error) {

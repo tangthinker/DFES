@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	gateway.Init()
 	utils.StartGrpcServer(gateway.DefaultRegistryServerAddr, func(server *grpc.Server) {
 		pb.RegisterRegistryServer(server, &gateway.RpcServer{})
 		go func() {

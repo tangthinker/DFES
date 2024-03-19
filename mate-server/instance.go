@@ -21,11 +21,14 @@ const (
 	DefaultDataClientCacheSize = 20
 )
 
-var mateServer = NewMateServer(DefaultRaftDir, DefaultRetainSnapshotCount, DefaultRaftAddr, DefaultServerName, DefaultFragmentSize, DefaultFragmentReplicaSize)
-
-var dataClientCache = utils.NewActionCache(DefaultDataClientCacheSize)
+var (
+	mateServer      *MateServer
+	dataClientCache *utils.ActionCache
+)
 
 func Init() {
+	mateServer = NewMateServer(DefaultRaftDir, DefaultRetainSnapshotCount, DefaultRaftAddr, DefaultServerName, DefaultFragmentSize, DefaultFragmentReplicaSize)
+	dataClientCache = utils.NewActionCache(DefaultDataClientCacheSize)
 	mateServer.registryCenter = utils.NewRegistryClient(gateway.DefaultRegistryServerAddr)
 	dataClientCache.RegisterGetFunc(func(key interface{}) interface{} {
 		addr := key.(string)
