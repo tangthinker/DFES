@@ -48,6 +48,43 @@ Quick start
 
 Structure
 ---------
+Firstly there is the bird's-eye view of the whole structure:
 ![Structure](./doc/img/structure.jpg)
+
+We can see that the whole system contains four main objects:
+
+1. Different programing language Client which can send requests to Mate-Server.
+2. Mate-Server cluster contains many Mate-Nodes.
+3. Data-Server cluster contains many Data-Nodes.
+4. All Mate-Server and all Data-Server will register on Registry.
+
+Process
+-------
+
+Let's talk about the Mate-Server start process:
+
+If we start Mate-Server with stand-alone mode or start the first node of the whole cluster:
+
+1. Firstly the Mate-Server node will register itself on the Registry.
+2. Then it will init Raft as the leader node in the cluster.
+
+If we start Mate-Server with cluster mode, and it's not the first node of the whole cluster:
+
+1. Firstly the Mate-Server node will register itself on the Registry.
+2. Then it will init Raft, through gRPC send Join request to the leader node of the cluster.
+
+When a Client wants to send a Write(push/delete) request to the Mate-Server:
+
+1. Firstly the Client will get the address of any one of the Mate-Nodes in the Mate-Server Cluster through gRPC request.
+2. Then the client will through gRPC send Write requests to the Mate-Node.
+3. If the address got on the first step is coincident the leader node address, it will process successful. If it is not, the Write request will return the NotLeaderNode Code and contains the leader node address, then retry Write request with the right leader node address.
+
+When a Client wants to send a Read(get) request to the Mate-Server:
+
+1. Firstly the Client will get the address of any one of the Mate-Nodes in the Mate-Server Cluster through gRPC request.
+2. Then the client will through gRPC send Write requests to the Mate-Node.
+3. Even if the address is not the leader node address, it will process successful, because it is the read request.
+
+
 
 Continuously supplementing...
