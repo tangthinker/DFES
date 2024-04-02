@@ -12,7 +12,7 @@ DFES is a distributed system using the following component to implement:
 
 Feature
 -------
-1. Distributed system.
+1. Distributed system, High availability.
 2. Mate-Server through raft protocol implement CP architecture.
 3. Data-Server through Quorum NRW implement AP architecture.
 4. Using Registry-Center manager all server information.
@@ -55,8 +55,11 @@ We can see that the whole system contains four main objects:
 
 1. Different programing language Client which can send requests to Mate-Server.
 2. Mate-Server cluster contains many Mate-Nodes. There will hava a Leader node in the Cluster.
+   - Mate-Server was used as the store of the meta-information of the file. It will store the fragment information of the file, such as how many fragments the file have, how many replicas each fragment have and where the replica store in the real Data-Node etc.
 3. Data-Server cluster contains many Data-Nodes.
+   - Data-Server will store the replica of the fragment from Mate-Server, and it will encrypt the replica with its own key.
 4. All Mate-Server and all Data-Server will register on Registry.
+   - Registry is the Address Container of whole system.
 
 Process
 -------
