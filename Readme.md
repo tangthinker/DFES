@@ -48,4 +48,6 @@ Quick start
 
 Structure
 ---------
+![Structure](./doc/img/structure.jpg)
+
 Continuously supplementing...
