@@ -89,7 +89,7 @@ When a Client wants to send a Read(get) request to the Mate-Server:
 ![Read](./doc/img/get-process.png)
 
 1. Firstly the Client will get the address of any one of the Mate-Nodes in the Mate-Server Cluster through gRPC request to the Registry.
-2. Then the client will through gRPC send Write requests to the Mate-Node.
+2. Then the client will through gRPC send Read requests to the Mate-Node.
 3. Even if the address is not the leader node address, it will process successful, because it is the read request.
 
 
