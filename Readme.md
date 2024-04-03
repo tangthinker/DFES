@@ -78,11 +78,15 @@ If we start Mate-Server with cluster mode, and it's not the first node of the wh
 
 When a Client wants to send a Write(push/delete) request to the Mate-Server:
 
+![Write](./doc/img/push-delete-process.png)
+
 1. Firstly the Client will get the address of any one of the Mate-Nodes in the Mate-Server Cluster through gRPC request to the Registry.
 2. Then the client will through gRPC send Write requests to the Mate-Node.
 3. If the address got on the first step is coincident the leader node address, it will process successful. If it is not, the Write request will return the NotLeaderNode Code and contains the leader node address, then retry Write request with the right leader node address.
 
 When a Client wants to send a Read(get) request to the Mate-Server:
+
+![Read](./doc/img/get-process.png)
 
 1. Firstly the Client will get the address of any one of the Mate-Nodes in the Mate-Server Cluster through gRPC request to the Registry.
 2. Then the client will through gRPC send Write requests to the Mate-Node.
