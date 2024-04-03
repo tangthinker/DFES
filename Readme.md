@@ -61,6 +61,10 @@ We can see that the whole system contains four main objects:
 4. All Mate-Server and all Data-Server will register on Registry.
    - Registry is the Address Container of whole system.
 
+Mate-Server Cluster Structure:
+
+![Mate-Server Cluster](./doc/img/Mate-Server-Structure.png)
+
 Process
 -------
 
