@@ -13,7 +13,6 @@ import (
 
 const (
 	DefaultKeyStorePath = "./data/key/"
-	DefaultServerName   = "shanliao-data-node-1"
 )
 
 var (
@@ -21,8 +20,10 @@ var (
 	dataService    *DataServer
 )
 
-func Init() {
-	dataService = NewDataServer(nil, nil, DefaultServerName)
+func Init(serverName string) {
+	dataService = NewDataServer(nil, nil, serverName)
+	dataService.serverName = serverName
+	dataService.storePath = DefaultDataStorePath + serverName + "/"
 	registerClient = pb.NewRegistryClient(utils.NewGrpcClient(RegistryAddr))
 	pri, pub := getKey(DefaultKeyStorePath)
 	dataService.privateKey = pri

@@ -29,8 +29,7 @@ func main() {
 		ServiceInterfaces: make([]*gatewayPB.ServiceInterface, 0),
 		HeartbeatAddress:  "",
 	})
-	dataServer.Init()
-	dataServer.SetDataServerName(*serverName)
+	dataServer.Init(*serverName)
 	utils.StartGrpcServer(*host+":"+*port, func(server *grpc.Server) {
 		dataServerPB.RegisterDataServiceServer(server, dataServer.RpcServer{})
 	})
