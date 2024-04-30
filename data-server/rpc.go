@@ -10,7 +10,10 @@ type RpcServer struct {
 }
 
 func (RpcServer) Push(ctx context.Context, in *pb.PushRequest) (*pb.PushResponse, error) {
-	fragmentId := dataService.Push(in.GetFragmentData())
+	fragmentId, err := dataService.Push(in.GetFragmentData())
+	if err != nil {
+		return nil, err
+	}
 	return &pb.PushResponse{
 		FragmentId:  fragmentId,
 		ServiceName: dataService.serverName,
@@ -18,7 +21,10 @@ func (RpcServer) Push(ctx context.Context, in *pb.PushRequest) (*pb.PushResponse
 	}, nil
 }
 func (RpcServer) Get(ctx context.Context, in *pb.GetRequest) (*pb.GetResponse, error) {
-	data := dataService.Get(in.GetFragmentId())
+	data, err := dataService.Get(in.GetFragmentId())
+	if err != nil {
+		return nil, err
+	}
 	return &pb.GetResponse{
 		FragmentData: data,
 		GetResult:    true,

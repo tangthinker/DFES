@@ -3,6 +3,7 @@ package encryption
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"fmt"
 )
 
 // initialization vector
@@ -11,35 +12,35 @@ var commonIV = []byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09
 type SymmetricEncryptor struct {
 }
 
-func (se *SymmetricEncryptor) Encrypt(key []byte, data []byte, encryptType EncryptType) []byte {
+func (se *SymmetricEncryptor) Encrypt(key []byte, data []byte, encryptType EncryptType) ([]byte, error) {
 	switch encryptType {
 	case AES:
 		block, err := aes.NewCipher(key)
 		if err != nil {
-			panic("key is invalid")
+			return nil, fmt.Errorf("key is invalid")
 		}
 		cfb := cipher.NewCFBEncrypter(block, commonIV)
 		result := make([]byte, len(data))
 		cfb.XORKeyStream(result, data)
-		return result
+		return result, nil
 	default:
-		panic("encrypt type invalid")
+		return nil, fmt.Errorf("encrypt type invalid")
 	}
 }
 
-func (se *SymmetricEncryptor) Decrypt(key []byte, data []byte, encryptType EncryptType) []byte {
+func (se *SymmetricEncryptor) Decrypt(key []byte, data []byte, encryptType EncryptType) ([]byte, error) {
 	switch encryptType {
 	case AES:
 		block, err := aes.NewCipher(key)
 		if err != nil {
-			panic("key is invalid")
+			return nil, fmt.Errorf("key is invalid")
 		}
 		cfb := cipher.NewCFBDecrypter(block, commonIV)
 		result := make([]byte, len(data))
 		cfb.XORKeyStream(result, data)
-		return result
+		return result, nil
 	default:
-		panic("encrypt type invalid")
+		return nil, fmt.Errorf("encrypt type invalid")
 	}
 }
 

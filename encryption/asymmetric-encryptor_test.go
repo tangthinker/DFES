@@ -7,11 +7,20 @@ import (
 
 func TestAsymmetricEncryptor_Encrypt(t *testing.T) {
 	ae := AsymmetricEncryptor{}
-	pri, pub := ae.GenerateKey(RSA)
+	pri, pub, err := ae.GenerateKey(RSA)
+	if err != nil {
+		t.Error(err)
+	}
 	fmt.Println(pri)
 	fmt.Println(pub)
-	cipher := ae.Encrypt(pub, text, RSA)
+	cipher, err := ae.Encrypt(pub, text, RSA)
+	if err != nil {
+		t.Error(err)
+	}
 	fmt.Println(string(cipher))
-	plain := ae.Decrypt(pri, cipher, RSA)
+	plain, err := ae.Decrypt(pri, cipher, RSA)
+	if err != nil {
+		t.Error(err)
+	}
 	fmt.Println(string(plain))
 }

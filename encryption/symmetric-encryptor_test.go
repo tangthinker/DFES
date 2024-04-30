@@ -13,8 +13,14 @@ func TestSymmetricEncryptor_Encrypt(t *testing.T) {
 	se := SymmetricEncryptor{}
 	key := NextSymmetricKey()
 	fmt.Println(key)
-	cipher := se.Encrypt(key, text, AES)
+	cipher, err := se.Encrypt(key, text, AES)
+	if err != nil {
+		t.Error(err)
+	}
 	fmt.Println(string(cipher))
-	plain := se.Decrypt(key, cipher, AES)
+	plain, err := se.Decrypt(key, cipher, AES)
+	if err != nil {
+		t.Error(err)
+	}
 	fmt.Println(string(plain))
 }

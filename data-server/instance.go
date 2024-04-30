@@ -46,7 +46,7 @@ func getKey(path string) ([]byte, []byte) {
 	pubName := dataService.serverName + ".public.key"
 	pri, err := os.ReadFile(filepath.Join(path, priName))
 	if err != nil {
-		pri, pub := (&encryption.AsymmetricEncryptor{}).GenerateKey(encryption.RSA)
+		pri, pub, _ := (&encryption.AsymmetricEncryptor{}).GenerateKey(encryption.RSA)
 		_ = utils.CreateDirIfNotExist(path)
 		err = os.WriteFile(filepath.Join(path, priName), pri, 0700)
 		err = os.WriteFile(filepath.Join(path, pubName), pub, 0700)
@@ -57,7 +57,7 @@ func getKey(path string) ([]byte, []byte) {
 	}
 	pub, err := os.ReadFile(filepath.Join(path, pubName))
 	if err != nil {
-		pri, pub := (&encryption.AsymmetricEncryptor{}).GenerateKey(encryption.RSA)
+		pri, pub, _ := (&encryption.AsymmetricEncryptor{}).GenerateKey(encryption.RSA)
 		_ = utils.CreateDirIfNotExist(path)
 		err = os.WriteFile(priName, pri, 0700)
 		err = os.WriteFile(pubName, pub, 0700)

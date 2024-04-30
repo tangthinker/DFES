@@ -35,21 +35,39 @@ func NewDataServer(privateKey []byte, publicKey []byte, idPrefix string) *DataSe
 	}
 }
 
-func (ds *DataServer) Push(data []byte) string {
+func (ds *DataServer) Push(data []byte) (string, error) {
 	fragmentKey := encryption.NextSymmetricKey()
 	var fragment Fragment
-	fragment.EncryptKey = ds.asymmetricEncryptor.Encrypt(ds.publicKey, fragmentKey, encryption.RSA)
-	fragment.EncryptData = ds.symmetricEncryptor.Encrypt(fragmentKey, data, encryption.AES)
+	encryptKey, err := ds.asymmetricEncryptor.Encrypt(ds.publicKey, fragmentKey, encryption.RSA)
+	if err != nil {
+		log.Println("encrypt fragment key error:", err)
+		return "", err
+	}
+	encryptData, err := ds.symmetricEncryptor.Encrypt(fragmentKey, data, encryption.AES)
+	if err != nil {
+		log.Println("encrypt fragment data error:", err)
+		return "", err
+	}
+	fragment.EncryptKey = encryptKey
+	fragment.EncryptData = encryptData
 	fragment.FragmentId = ds.idGen.Next()
 	store(ds.storePath, &fragment)
-	return fragment.FragmentId
+	return fragment.FragmentId, nil
 }
 
-func (ds *DataServer) Get(id string) []byte {
+func (ds *DataServer) Get(id string) ([]byte, error) {
 	fragment := restore(ds.storePath, id)
-	fragmentKey := ds.asymmetricEncryptor.Decrypt(ds.privateKey, fragment.EncryptKey, encryption.RSA)
-	data := ds.symmetricEncryptor.Decrypt(fragmentKey, fragment.EncryptData, encryption.AES)
-	return data
+	fragmentKey, err := ds.asymmetricEncryptor.Decrypt(ds.privateKey, fragment.EncryptKey, encryption.RSA)
+	if err != nil {
+		log.Println("decrypt fragment key error:", err)
+		return nil, err
+	}
+	data, err := ds.symmetricEncryptor.Decrypt(fragmentKey, fragment.EncryptData, encryption.AES)
+	if err != nil {
+		log.Println("decrypt fragment data error:", err)
+		return nil, err
+	}
+	return data, nil
 }
 
 func (ds *DataServer) Delete(id string) bool {
