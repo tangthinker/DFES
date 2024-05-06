@@ -18,6 +18,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -80,8 +81,9 @@ func (ms *MateServer) Push(ctx context.Context, data []byte) (string, error) {
 	}
 	fragmentCnt := int64(len(data)) / ms.FragmentSize // MB
 	floatCnt := float64(len(data)) / float64(ms.FragmentSize)
-	hasRest := strings.Split(fmt.Sprintf("%.1f", floatCnt), ".")[1] == "0"
-	if !hasRest {
+	littleNumber, _ := strconv.ParseInt(strings.Split(fmt.Sprintf("%.10f", floatCnt), ".")[1], 10, 64)
+	hasRest := littleNumber != 0
+	if hasRest {
 		fragmentCnt++
 	}
 	var fileMate FileMate
