@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"syscall"
 	"time"
 )
 
@@ -32,21 +31,21 @@ func CreateFileIfNotExist(dir string, fileName string) error {
 				log.Printf("sync file failed![%v]\n", err)
 				chErr <- err
 			}
-			fd := file.Fd()
-			if err := syscall.Fsync(int(fd)); err != nil {
-				log.Println("sync file to disk error:", err)
-				chErr <- err
-			}
+			//fd := file.Fd()
+			//if err := syscall.Fsync(int(fd)); err != nil {
+			//	log.Println("sync file to disk error:", err)
+			//	chErr <- err
+			//}
 			err = file.Close()
 			if err != nil {
 				log.Println("close file error:", err)
 				chErr <- err
 			}
-			err = syscall.Sync()
-			if err != nil {
-				log.Println("syscall sync error")
-				chErr <- err
-			}
+			//err = syscall.Sync()
+			//if err != nil {
+			//	log.Println("syscall sync error")
+			//	chErr <- err
+			//}
 			chErr <- nil
 		}(chErr)
 		select {
