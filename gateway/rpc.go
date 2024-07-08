@@ -3,7 +3,7 @@ package gateway
 import (
 	"context"
 	"errors"
-	pb "github.com/shanliao420/DFES/gateway/proto"
+	pb "github.com/tangthinker/DFES/gateway/proto"
 	"log"
 )
 

@@ -3,10 +3,10 @@ package mate_server
 import (
 	"context"
 	"fmt"
-	"github.com/shanliao420/DFES/gateway"
-	id_generator "github.com/shanliao420/DFES/id-generator"
-	mateServerPB "github.com/shanliao420/DFES/mate-server/proto"
-	"github.com/shanliao420/DFES/utils"
+	"github.com/tangthinker/DFES/gateway"
+	id_generator "github.com/tangthinker/DFES/id-generator"
+	mateServerPB "github.com/tangthinker/DFES/mate-server/proto"
+	"github.com/tangthinker/DFES/utils"
 	"log"
 	"time"
 )

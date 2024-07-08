@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/shanliao420/DFES/gateway"
-	pb "github.com/shanliao420/DFES/gateway/proto"
-	"github.com/shanliao420/DFES/utils"
+	"github.com/tangthinker/DFES/gateway"
+	pb "github.com/tangthinker/DFES/gateway/proto"
+	"github.com/tangthinker/DFES/utils"
 	"google.golang.org/grpc"
 	"time"
 )

@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"github.com/shanliao420/DFES/gateway"
-	"github.com/shanliao420/DFES/gateway/proto"
-	proto2 "github.com/shanliao420/DFES/mate-server/proto"
-	"github.com/shanliao420/DFES/utils"
+	"github.com/tangthinker/DFES/gateway"
+	"github.com/tangthinker/DFES/gateway/proto"
+	proto2 "github.com/tangthinker/DFES/mate-server/proto"
+	"github.com/tangthinker/DFES/utils"
 	"io"
 	"log"
 	"os"

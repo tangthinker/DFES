@@ -2,7 +2,7 @@ package utils
 
 import (
 	"context"
-	pb "github.com/shanliao420/DFES/gateway/proto"
+	pb "github.com/tangthinker/DFES/gateway/proto"
 	"google.golang.org/grpc"
 	"log"
 	"time"

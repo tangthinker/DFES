@@ -3,9 +3,9 @@ package utils
 import (
 	"context"
 	"errors"
-	dataServer "github.com/shanliao420/DFES/data-server/proto"
-	gateway "github.com/shanliao420/DFES/gateway/proto"
-	mateServerPB "github.com/shanliao420/DFES/mate-server/proto"
+	dataServer "github.com/tangthinker/DFES/data-server/proto"
+	gateway "github.com/tangthinker/DFES/gateway/proto"
+	mateServerPB "github.com/tangthinker/DFES/mate-server/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"

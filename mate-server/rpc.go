@@ -2,7 +2,7 @@ package mate_server
 
 import (
 	"context"
-	pb "github.com/shanliao420/DFES/mate-server/proto"
+	pb "github.com/tangthinker/DFES/mate-server/proto"
 	"io"
 )
 

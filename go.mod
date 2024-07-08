@@ -1,4 +1,4 @@
-module github.com/shanliao420/DFES
+module github.com/tangthinker/DFES
 
 go 1.21.4
 

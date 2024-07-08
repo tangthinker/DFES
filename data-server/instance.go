@@ -2,10 +2,10 @@ package data_server
 
 import (
 	"context"
-	"github.com/shanliao420/DFES/encryption"
-	pb "github.com/shanliao420/DFES/gateway/proto"
-	idGenerator "github.com/shanliao420/DFES/id-generator"
-	"github.com/shanliao420/DFES/utils"
+	"github.com/tangthinker/DFES/encryption"
+	pb "github.com/tangthinker/DFES/gateway/proto"
+	idGenerator "github.com/tangthinker/DFES/id-generator"
+	"github.com/tangthinker/DFES/utils"
 	"log"
 	"os"
 	"path/filepath"

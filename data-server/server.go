@@ -3,9 +3,9 @@ package data_server
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/shanliao420/DFES/encryption"
-	idGenerator "github.com/shanliao420/DFES/id-generator"
-	"github.com/shanliao420/DFES/utils"
+	"github.com/tangthinker/DFES/encryption"
+	idGenerator "github.com/tangthinker/DFES/id-generator"
+	"github.com/tangthinker/DFES/utils"
 	"log"
 	"os"
 	"path/filepath"
